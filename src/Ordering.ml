@@ -1,11 +1,14 @@
 
 type order =
-  | Less    (** [a < b] *)
-  | Equal   (** [a = b] *)
-  | Greater (** [a > b] *)
+  | Less
+  | Equal
+  | Greater
 
 module Order = struct
-  type t = order
+  type t = order =
+    | Less
+    | Equal
+    | Greater
 
   let to_int t =
     match t with

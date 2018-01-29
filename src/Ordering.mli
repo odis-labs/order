@@ -25,8 +25,11 @@ type order =
 
 (** Module for the {!type:order} type. *)
 module Order : sig
-  type t = order
   (** Defines the relative order of two values. *)
+  type t = order =
+    | Less    (** [a < b], [a] is less than [b]. *)
+    | Equal   (** [a = b], [a] is equal to [b]. *)
+    | Greater (** [a > b], [a] is greater than [b]. *)
 
   val to_int : t -> int
   (** Represents an ordering as an integers.
@@ -328,9 +331,9 @@ module Person = struct
   end)
 end
 
-let alice = Persion.{ name = "Alicea"; age = 23 }
-let bob   = Persion.{ name = "Bob";    age = 28 }
-let craig = Persion.{ name = "Craig";  age = 43 }
+let alice = Person.{ name = "Alice"; age = 23 }
+let bob   = Person.{ name = "Bob";   age = 28 }
+let craig = Person.{ name = "Craig"; age = 43 }
 
 let () =
   assert Person.By_age.(bob > alice);
@@ -543,9 +546,10 @@ module type Ordered = Ordered0
     Public comparison operations included when the top-level [Ordering] module
     is open.
 
-    {b Note:} By default the standard comparison functions are specialised to integers.
-    To compare other types consider using the combinators provided in the
-    [Equal] and [Ordered] modules, or opening the [Generic] module. *)
+    {b Note:} By default the standard comparison functions are specialised to
+    integers. To compare other types consider using the combinators provided
+    in the [Equal] and [Ordered] modules. Alternatively you may open the
+    {{: #generic} [Generic]} module. *)
 
 val ( = ) : int -> int -> bool
 (** Public alias for {!val:Equal0.(=)} specialised to integers. *)
@@ -572,7 +576,7 @@ val max : int -> int -> int
 (** Public alias for {!val:Ordered0.max} specialised to integers. *)
 
 
-(** {2 Physical equality testing function} *)
+(** {2:physical_equality Physical Equality} *)
 
 val is : 'a -> 'a -> bool
 (** [is a b] tests for physical equality of [a] and [b].
@@ -586,7 +590,7 @@ val is : 'a -> 'a -> bool
     To check if two values are physically distinct use [not (is a b)]. *)
 
 val (==) : 'a -> 'a -> bool
-[@@ocaml.deprecated "Please use `is` instead of `==`."]
+[@@ocaml.deprecated "Please use \"is\" instead of \"==\"."]
 (** Using the [==] is discouraged because of its visual similarity  with [=]
     and different semantics. The {{: #val-is} [is]} operator should be used instead.
 
@@ -621,8 +625,11 @@ module Generic : sig
       structures ({i e.g.} references and arrays) are equal if and only if
       their current contents are structurally equal, even if the two mutable
       objects are not the same physical object (as tested with {!val:is}).
+
       @raise Invalid_argument if function values are compared for equality.
+
       {b Warning:} Equality between cyclic data structures may not terminate.
+
       {b See also: } {{: #val-equal} [equal]}, {{: #val-is} [is]} *)
 
   val ( <> ) : 'a -> 'a -> bool
@@ -657,14 +664,18 @@ module Generic : sig
       them to a total ordering over all types.  The ordering is compatible with
       {!(==)}. As in the case of {!(==)}, mutable structures are compared by
       contents.
+
       @raise Invalid_argument if function values are compared for equality.
+
       {b Warning:} Equality between cyclic data structures may not terminate. *)
 
   val min : 'a -> 'a -> 'a
   (** [min a b] returns the smaller of the two arguments.
       The result is unspecified if one of the arguments contains
       the float value [nan].
+
       @raise Invalid_argument if function values are compared for equality.
+
       {b Warning:} Equality between cyclic data structures may not terminate.
 {[
 assert (min 2 5 = 2);
@@ -675,7 +686,9 @@ assert (min [1; 2; 3] [2; 3; 4] = [1; 2; 3])
   (** [max a b] returns the greater of the two arguments.
       The result is unspecified if one of the arguments contains
       the float value [nan].
+
       @raise Invalid_argument if function values are compared for equality.
+
       {b Warning:} Equality between cyclic data structures may not terminate.
 {[
 assert (max 2 5 = 5);
