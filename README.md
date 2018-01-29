@@ -18,7 +18,7 @@ instructions.
 ## Documentation
 
 The documentation and API reference is generated from the source interfaces. It
-can be consulted [online][https://rizo.github.io/ordering/doc] or via `odig doc cmp`.
+can be consulted [online][https://rizo.github.io/ordering/doc] or via `odig doc ordering`.
 
 
 ## License
