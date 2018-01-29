@@ -2,7 +2,7 @@
 
 Interfaces, modules and operations for ordering and comparison of OCaml values.
 
-- *Homepage*: <https://rizo.github.io/ordering>
+- *Homepage*: <http://odis.io/ordering>
 
 
 ## Installation
@@ -18,7 +18,7 @@ instructions.
 ## Documentation
 
 The documentation and API reference is generated from the source interfaces. It
-can be consulted [online][https://rizo.github.io/ordering/doc] or via `odig doc ordering`.
+can be consulted [online][http://odis.io/ordering/Ordering] or via `odig doc ordering`.
 
 
 ## License
