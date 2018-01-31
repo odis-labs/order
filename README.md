@@ -1,15 +1,15 @@
-# Ordering (Unreleased)
+# Compare (Unreleased)
 
-Interfaces, modules and operations for ordering and comparison of OCaml values.
+Comparison and ordering of OCaml values.
 
-- *Homepage*: <http://odis.io/ordering>
+- *Homepage*: <http://odis.io/compare>
 
 
 ## Installation
 
 iter can be installed with `opam`:
 
-    opam install ordering
+    opam install compare
 
 If you don't use `opam` consult the [`opam`](opam) file for build
 instructions.
@@ -18,7 +18,7 @@ instructions.
 ## Documentation
 
 The documentation and API reference is generated from the source interfaces. It
-can be consulted [online][http://odis.io/ordering/Ordering] or via `odig doc ordering`.
+can be consulted [online][http://odis.io/compare/Compare] or via `odig doc compare`.
 
 
 ## License

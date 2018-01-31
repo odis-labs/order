@@ -1,8 +1,24 @@
+(* Copyright (c) 2018 Rizo I <rizo@odis.io>
+ *
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. *)
 
-(**
-    Interfaces, modules and operations for ordering and comparison of OCaml values.
+(** Functionality for comparison and ordering of OCaml values.
 
-    This library provides the following features:
+    This library defines interfaces for equality and ordering comparisons.
+    Types can implement [Equal] or [Ordered] interfaces to include comparison
+    operations.
+
+    The following features are provided:
 
     {ul
     {- New {{: #type-order} [order]} type to replace integer-based ordering.}
@@ -17,16 +33,16 @@
 
 (** {1 Types} *)
 
-(** Defines the relative order of two values. *)
-type order =
+(** Defines the relative ordering of two values. *)
+type ordering =
   | Less    (** [a < b], [a] is less than [b]. *)
   | Equal   (** [a = b], [a] is equal to [b]. *)
   | Greater (** [a > b], [a] is greater than [b]. *)
 
-(** Module for the {!type:order} type. *)
-module Order : sig
+(** Module for the {!type:ordering} type. *)
+module Ordering : sig
   (** Defines the relative order of two values. *)
-  type t = order =
+  type t = ordering =
     | Less    (** [a < b], [a] is less than [b]. *)
     | Equal   (** [a = b], [a] is equal to [b]. *)
     | Greater (** [a > b], [a] is greater than [b]. *)
@@ -64,11 +80,107 @@ end
 type 'a equality = 'a -> 'a -> bool
 (** The type of equality testing functions. *)
 
-type 'a comparator = 'a -> 'a -> order
+(** Module for the {!type:ordering} function type. Includes implementations for
+    common data types. *)
+module Equality : sig
+  type 'a t = 'a equality
+  (** The type of equality testing functions. *)
+
+  val unit : unit equality
+  (** Equality testing function for values of type [unit]. *)
+
+  val bool : bool equality
+  (** Equality testing function for values of type [bool]. *)
+
+  val char : char equality
+  (** Equality testing function for values of type [char]. *)
+
+  val int : int equality
+  (** Equality testing function for values of type [int]. *)
+
+  val int32 : int32 equality
+  (** Equality testing function for values of type [int32]. *)
+
+  val int64 : int64 equality
+  (** Equality testing function for values of type [int64]. *)
+
+  val float : float equality
+  (** Equality testing function for values of type [float]. *)
+
+  val string : string equality
+  (** Equality testing function for values of type [string]. *)
+
+  val bytes : bytes equality
+  (** Equality testing function for values of type [bytes]. *)
+
+  val list : 'a equality -> 'a list equality
+  (** Equality testing function for values of type [list]. *)
+
+  val array : 'a equality -> 'a array equality
+  (** Equality testing function for values of type [array]. *)
+
+  val option : 'a equality -> 'a option equality
+  (** Equality testing function for values of type [option]. *)
+
+  val result : 'a equality -> 'b equality -> ('a, 'b) result equality
+  (** Equality testing function for values of type [result]. *)
+
+  val ref : 'a equality -> 'a ref equality
+  (** Equality testing function for values of type [ref]. *)
+
+  val pair : 'a equality -> 'b equality -> ('a * 'b) equality
+  (** Equality testing function for pairs of type ['a * 'b]. *)
+end
+
+type 'a comparator = 'a -> 'a -> ordering
 (** The type of order comparison functions. *)
 
+(** Module for the {!type:comparator} function type. Includes implementations for
+    common data types. *)
+module Comparator : sig
+  type 'a t = 'a comparator
+  (** The type of order comparison functions. *)
 
-(** {1:equality Equality}
+  val unit : unit comparator
+  (** Order comparison function for values of type [unit]. *)
+
+  val bool : bool comparator
+  (** Order comparison function for values of type [bool]. *)
+
+  val char : char comparator
+  (** Order comparison function for values of type [char]. *)
+
+  val int : int comparator
+  (** Order comparison function for values of type [int]. *)
+
+  val float : float comparator
+  (** Order comparison function for values of type [float]. *)
+
+  val string : string comparator
+  (** Order comparison function for values of type [string]. *)
+
+  val list : 'a comparator -> 'a list comparator
+  (** Order comparison function for values of type [list]. *)
+
+  val array : 'a comparator -> 'a array comparator
+  (** Order comparison function for values of type [array]. *)
+
+  val option : 'a comparator -> 'a option comparator
+  (** Order comparison function for values of type [option]. *)
+
+  val result : 'a comparator -> 'b comparator -> ('a, 'b) result comparator
+  (** Order comparison function for values of type [result]. *)
+
+  val ref : 'a comparator -> 'a ref comparator
+  (** Order comparison function for values of type [ref]. *)
+
+  val pair : 'a comparator -> 'b comparator -> ('a * 'b) comparator
+  (** Order comparison function for pairs of type ['a * 'b]. *)
+
+end
+
+
+(** {1:equality Equality Interfaces}
 
     Equality comparisons for monomorphic and polymorphic types.
 
@@ -77,8 +189,6 @@ type 'a comparator = 'a -> 'a -> order
     https://en.wikipedia.org/wiki/Equivalence_relation} equivalence relation},
     which means that it must be: {i reflexive}, {i symmetric} and {i
     transitive}.
-
-    Functions for both structural and physical equality are defined.
 
     User-defined types can implement the {!modtype:Equal}, {!modtype:Equal1} or
     {!modtype:Equal2} interfaces (according to the arity of the main type) to
@@ -92,7 +202,7 @@ type 'a comparator = 'a -> 'a -> order
     {2 Example}
 
 {[
-open Ordering
+open Compare
 
 module Book = struct
   type t = {
@@ -153,54 +263,6 @@ module Equal0 : sig
 
   (** Extends the base definition for equatable monomorphic types. *)
   module Make (Base : Base) : Equal0 with type t := Base.t
-
-
-  (** {2:funcs Common equality testing functions} *)
-
-  val unit : unit equality
-  (** Equality testing function for values of type [unit]. *)
-
-  val bool : bool equality
-  (** Equality testing function for values of type [bool]. *)
-
-  val char : char equality
-  (** Equality testing function for values of type [char]. *)
-
-  val int : int equality
-  (** Equality testing function for values of type [int]. *)
-
-  val int32 : int32 equality
-  (** Equality testing function for values of type [int32]. *)
-
-  val int64 : int64 equality
-  (** Equality testing function for values of type [int64]. *)
-
-  val float : float equality
-  (** Equality testing function for values of type [float]. *)
-
-  val string : string equality
-  (** Equality testing function for values of type [string]. *)
-
-  val bytes : bytes equality
-  (** Equality testing function for values of type [bytes]. *)
-
-  val list : 'a equality -> 'a list equality
-  (** Equality testing function for values of type [list]. *)
-
-  val array : 'a equality -> 'a array equality
-  (** Equality testing function for values of type [array]. *)
-
-  val option : 'a equality -> 'a option equality
-  (** Equality testing function for values of type [option]. *)
-
-  val result : 'a equality -> 'b equality -> ('a, 'b) result equality
-  (** Equality testing function for values of type [result]. *)
-
-  val ref : 'a equality -> 'a ref equality
-  (** Equality testing function for values of type [ref]. *)
-
-  val pair : 'a equality -> 'b equality -> ('a * 'b) equality
-  (** Equality testing function for pairs of type ['a * 'b]. *)
 end
 
 
@@ -295,7 +357,7 @@ module type Equal = Equal0
 (** Alias for extended interface for equatable monomorphic types. *)
 
 
-(** {1:ordering Ordering}
+(** {1:ordering Ordering Interfaces}
 
     This section defines types, interfaces and operations for values that form
     a total order relation.
@@ -314,7 +376,7 @@ module type Equal = Equal0
 
     {2 Example}
 {[
-open Ordering
+open Compare
 
 module Person = struct
   type t = {
@@ -350,7 +412,7 @@ module type Ordered0 = sig
   type t
   (** The type for ordered values. *)
 
-  val compare : t -> t -> order
+  val compare : t comparator
   (** Returns an {!type:ordering} between two values. *)
 
   include Equal0 with type t := t
@@ -417,50 +479,12 @@ module Ordered0 : sig
     type t
     (** The type for ordered values. *)
 
-    val compare : t -> t -> order
+    val compare : t comparator
     (** Returns an {!type:ordering} between two values. *)
   end
 
   (** Interface builder for ordered types. *)
   module Make (Base : Base) : Ordered0 with type t := Base.t
-
-  (** {2:funcs Order comparison functions} *)
-
-  val unit : unit comparator
-  (** Order comparison function for values of type [unit]. *)
-
-  val bool : bool comparator
-  (** Order comparison function for values of type [bool]. *)
-
-  val char : char comparator
-  (** Order comparison function for values of type [char]. *)
-
-  val int : int comparator
-  (** Order comparison function for values of type [int]. *)
-
-  val float : float comparator
-  (** Order comparison function for values of type [float]. *)
-
-  val string : string comparator
-  (** Order comparison function for values of type [string]. *)
-
-  val list : 'a comparator -> 'a list comparator
-  (** Order comparison function for values of type [list]. *)
-
-  val array : 'a comparator -> 'a array comparator
-  (** Order comparison function for values of type [array]. *)
-
-  val option : 'a comparator -> 'a option comparator
-  (** Order comparison function for values of type [option]. *)
-
-  val result : 'a comparator -> 'b comparator -> ('a, 'b) result comparator
-  (** Order comparison function for values of type [result]. *)
-
-  val ref : 'a comparator -> 'a ref comparator
-  (** Order comparison function for values of type [ref]. *)
-
-  val pair : 'a comparator -> 'b comparator -> ('a * 'b) comparator
-  (** Order comparison function for pairs of type ['a * 'b]. *)
 end
 
 (** {2 Polymorphic Unary Types}
@@ -471,10 +495,10 @@ end
 module type Ordered1 = sig
   type 'a t
 
-  val compare : ('a -> 'a -> order) -> 'a t -> 'a t -> order
+  val compare : 'a comparator -> 'a t comparator
 
-  val min : ('a -> 'a -> order) -> 'a t -> 'a t -> 'a t
-  val max : ('a -> 'a -> order) -> 'a t -> 'a t -> 'a t
+  val min : 'a comparator -> 'a t -> 'a t -> 'a t
+  val max : 'a comparator -> 'a t -> 'a t -> 'a t
 end
 
 (** Extension builder module for ordered polymorphic unary types. *)
@@ -483,7 +507,7 @@ module Ordered1 : sig
   module type Base = sig
     type 'a t
 
-    val compare : ('a -> 'a -> order) -> 'a t -> 'a t -> order
+    val compare : 'a comparator -> 'a t comparator
   end
 
   (** Interface builder for ordered types. *)
@@ -499,20 +523,10 @@ end
 module type Ordered2 = sig
   type ('a, 'b) t
 
-  val compare :
-    ('a -> 'a -> order) ->
-    ('b -> 'b -> order) ->
-    ('a, 'b) t -> ('a, 'b) t -> order
+  val compare : 'a comparator -> 'b comparator -> ('a, 'b) t comparator
 
-  val min :
-    ('a -> 'a -> order) ->
-    ('b -> 'b -> order) ->
-    ('a, 'b) t -> ('a, 'b) t -> ('a, 'b) t
-
-  val max :
-    ('a -> 'a -> order) ->
-    ('b -> 'b -> order) ->
-    ('a, 'b) t -> ('a, 'b) t -> ('a, 'b) t
+  val min : 'a comparator -> 'b comparator -> ('a, 'b) t -> ('a, 'b) t -> ('a, 'b) t
+  val max : 'a comparator -> 'b comparator -> ('a, 'b) t -> ('a, 'b) t -> ('a, 'b) t
 end
 
 (** Extension builder module for ordered polymorphic binary types. *)
@@ -522,10 +536,7 @@ module Ordered2 : sig
   module type Base = sig
     type ('a, 'b) t
 
-    val compare :
-      ('a -> 'a -> order) ->
-      ('b -> 'b -> order) ->
-      ('a, 'b) t -> ('a, 'b) t -> order
+    val compare : 'a comparator -> 'b comparator -> ('a, 'b) t comparator
   end
 
   (** Interface builder for ordered types. *)
@@ -594,7 +605,7 @@ val (==) : 'a -> 'a -> bool
 (** Using the [==] is discouraged because of its visual similarity  with [=]
     and different semantics. The {{: #val-is} [is]} operator should be used instead.
 
-    {b Note:} This API spec is included to raise a deprecation warning during
+    {b Note:} This operator is included to raise a deprecation warning during
     compilation. *)
 
 
@@ -641,7 +652,7 @@ module Generic : sig
 
   (** {1:generic_ordering Generic Ordering} *)
 
-  val compare : 'a -> 'a -> order
+  val compare : 'a comparator
   (** [compare a b] returns [0] if [a] is equal to [b], [-1] if [a] is less than
       [b], and [1] if [a] is greater than [b].
       The ordering implemented by [compare] is compatible with the comparison
