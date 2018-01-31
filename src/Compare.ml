@@ -391,7 +391,6 @@ module Ordered = Ordered0
 module type Ordered = Ordered0
 
 (* Public *)
-
 let ( = )  : int -> int -> bool = Pervasives.( = )
 let ( <> ) : int -> int -> bool = Pervasives.( <> )
 let ( < )  : int -> int -> bool = Pervasives.( < )
@@ -404,7 +403,7 @@ let is = Pervasives.(==)
 let (==) = Pervasives.(==)
 
 
-module Generic = struct
+module Magic = struct
   let compare a b =
     let legacy_cmp : 'a -> 'a -> int = Pervasives.compare in
     let order = legacy_cmp a b in

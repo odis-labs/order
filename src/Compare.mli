@@ -21,13 +21,13 @@
     The following features are provided:
 
     {ul
-    {- New {{: #type-order} [order]} type to replace integer-based ordering.}
-    {- Extended {{: module-type-Equal/index.html} [Equal]} and {{:
-    module-type-Ordered/index.html} [Ordered]} interfaces for custom types.}
+    {- New {{: #type-ordering} [ordering]} type to replace integer-based ordering.}
+    {- Extended {{: module-type-Ordered/index.html} [Ordered]} and {{:
+    module-type-Equal/index.html} [Equal]} interfaces for custom types.}
     {- {{: #public} Public} comparison operations specialized to integers}
-    {- Optional {{: #generic} Generic} module for polymorphic comparisons.}
-    {- {{: Equal/index.html#funcs} Equality} and {{:
-    Ordered/index.html#funcs} ordering} functions for common data
+    {- Convenience {{: #magic} Magic} module for polymorphic comparisons.}
+    {- {{: Equality/index.html} Equality} and {{:
+    Comparator/index.html} ordering} functions for common data
     types.}
     {- New physical equality operator {{: #val-is} [is]} and deprecated {{: #val-(==)} [==]}. }}*)
 
@@ -212,11 +212,11 @@ module Book = struct
   }
 
   (* Equality by ISBN. *)
-  include Equal.Make(struct
+  include Equal0.Make(struct
     type nonrec t = t
 
     let equal t1 t2 =
-      Equal.string t1.isbn t2.isbn
+      Equality.string t1.isbn t2.isbn
   end)
 end
 ]} *)
@@ -385,11 +385,11 @@ module Person = struct
   }
 
   (* Ordering by age. *)
-  module By_age = Ordered.Make(struct
+  module By_age = Ordered0.Make(struct
     type nonrec t = t
 
     let compare t1 t2 =
-      Ordered.int t1.age t2.age
+      Comparator.int t1.age t2.age
   end)
 end
 
@@ -552,15 +552,37 @@ module type Ordered = Ordered0
 (** Alias for extended interface for ordered monomorphic types. *)
 
 
+(** {1:physical_equality Physical Equality} *)
+
+val is : 'a -> 'a -> bool
+(** [is a b] tests for physical equality of [a] and [b].
+
+    On mutable types such as references, arrays, byte sequences, records with
+    mutable fields and objects with mutable instance variables, [is a b] is
+    true if and only if physical modification of [a] also affects [b].
+    On non-mutable types, the behavior of [is] is implementation-dependent;
+    however, it is guaranteed that [is a b] implies [a = b].
+
+    To check if two values are physically distinct use [not (is a b)]. *)
+
+val (==) : 'a -> 'a -> bool
+[@@ocaml.deprecated "Please use \"is\" instead of \"==\"."]
+(** Using the [==] is discouraged because of its visual similarity  with [=]
+    and different semantics. The {{: #val-is} [is]} operator should be used instead.
+
+    {b Note:} This operator is included to raise a deprecation warning during
+    compilation. *)
+
+
 (** {1:public Public}
 
-    Public comparison operations included when the top-level [Ordering] module
+    Public comparison operations included when the top-level [Compare] module
     is open.
 
     {b Note:} By default the standard comparison functions are specialised to
-    integers. To compare other types consider using the combinators provided
-    in the [Equal] and [Ordered] modules. Alternatively you may open the
-    {{: #generic} [Generic]} module. *)
+    integers. To compare other types consider using the combinators provided in
+    the [Equality] and [Comparator] modules. Alternatively you may open the {{:
+    #magic} [Magic]} module. *)
 
 val ( = ) : int -> int -> bool
 (** Public alias for {!val:Equal0.(=)} specialised to integers. *)
@@ -587,49 +609,29 @@ val max : int -> int -> int
 (** Public alias for {!val:Ordered0.max} specialised to integers. *)
 
 
-(** {2:physical_equality Physical Equality} *)
+(** {1:magic Magic ✨}
 
-val is : 'a -> 'a -> bool
-(** [is a b] tests for physical equality of [a] and [b].
-
-    On mutable types such as references, arrays, byte sequences, records with
-    mutable fields and objects with mutable instance variables, [is a b] is
-    true if and only if physical modification of [a] also affects [b].
-    On non-mutable types, the behavior of [is] is implementation-dependent;
-    however, it is guaranteed that [is a b] implies [a = b].
-
-    To check if two values are physically distinct use [not (is a b)]. *)
-
-val (==) : 'a -> 'a -> bool
-[@@ocaml.deprecated "Please use \"is\" instead of \"==\"."]
-(** Using the [==] is discouraged because of its visual similarity  with [=]
-    and different semantics. The {{: #val-is} [is]} operator should be used instead.
-
-    {b Note:} This operator is included to raise a deprecation warning during
-    compilation. *)
-
-
-(** {1:generic Generic}
-
-    Polymorphic "magic" functions for structural comparison.
+    Polymorphic {{:
+    https://blog.janestreet.com/the-perils-of-polymorphic-compare/} "magic"}
+    functions for structural comparison.
 
 {[
-open Ordering.Generic
+open Compare.Magic
 
 let () =
   assert ('A' < 'Z');
   assert (max "abc" "xyz" = "xyz")
 ]}
-    {b Warning:} The polymorphic functions in {!Generic} are provided for
+    {b Warning:} The polymorphic functions in {!Magic} are provided for
     convenience and should not be used in performance-sensitive code. For
-    example, instead of using {!val:Generic.min} prefer the monomorphic
-    {!val:min} if you are workign with integer values.  Custom data types can
+    example, instead of using {!val:Magic.min} prefer the monomorphic
+    {!val:min} if you are working with integer values. Custom data types can
     implement their own specialized {{: #equality} equality} and {{: #ordering}
-    ordering} intefaces. *)
+    ordering} interfaces. *)
 
-module Generic : sig
+module Magic : sig
 
-  (** {1:generic_equality Generic Equality} *)
+  (** {2:generic_equality Polymorphic Equality} *)
 
   val ( = ) : 'a -> 'a -> bool
   (** [a = b] tests for structural equality of [a] and [b]. Mutable
@@ -650,7 +652,7 @@ module Generic : sig
   (** [equal a b] is equivalent to [a == b]. *)
 
 
-  (** {1:generic_ordering Generic Ordering} *)
+  (** {2:generic_ordering Polymorphic Ordering} *)
 
   val compare : 'a comparator
   (** [compare a b] returns [0] if [a] is equal to [b], [-1] if [a] is less than
@@ -669,11 +671,12 @@ module Generic : sig
   val ( >  ) : 'a -> 'a -> bool
   val ( <= ) : 'a -> 'a -> bool
   val ( >= ) : 'a -> 'a -> bool
-  (** Structural ordering functions.
+  (** {b Structural ordering functions.}
+
       These functions coincide with the usual orderings over integers,
       characters, strings, byte sequences and floating-point numbers, and extend
-      them to a total ordering over all types.  The ordering is compatible with
-      {!(==)}. As in the case of {!(==)}, mutable structures are compared by
+      them to a total ordering over all types. The ordering is compatible with
+      {!(=)}. As in the case of {!(=)}, mutable structures are compared by
       contents.
 
       @raise Invalid_argument if function values are compared for equality.
