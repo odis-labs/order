@@ -4,10 +4,16 @@ Functionality for comparison and ordering of OCaml values.
 
 ## Installation
 
-This package can be installed with [OPAM](http://opam.ocaml.org):
+The current stable version of the package can be installed with [OPAM](http://opam.ocaml.org):
 
 ```
 opam install compare
+```
+
+The development version can be installed by pinning the `master` branch:
+
+```
+opam pin add compare https://github.com/rizo/compare.git
 ```
 
 
