@@ -73,8 +73,10 @@ opam pin add compare https://github.com/rizo/compare.git
 
 ## Documentation
 
-The documentation and API reference is generated from the source interfaces. It
-can be consulted [online](http://odis.io/compare/Compare) or via `odig doc compare`.
+The documentation and API reference is generated from the source interfaces.
+
+- [Online API Reference](http://odis.io/compare/Compare)
+- Offline API Reference: `odig doc compare`
 
 
 ## License
