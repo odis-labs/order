@@ -2,20 +2,6 @@
 
 Functionality for comparison and ordering of OCaml values.
 
-## Installation
-
-The current stable version of the package can be installed with [OPAM](http://opam.ocaml.org):
-
-```
-opam install compare
-```
-
-The development version can be installed by pinning the `master` branch:
-
-```
-opam pin add compare https://github.com/rizo/compare.git
-```
-
 
 ## Examples
 
@@ -55,6 +41,21 @@ let () =
   (* Use specialized string list equality function. *)
   let equal = Equality.(list string) in
   assert (equal holders_by_wealth ["David"; "Craig"; "Alice"; "Bob"])
+```
+
+
+## Installation
+
+The current stable version of the package can be installed with [OPAM](http://opam.ocaml.org):
+
+```
+opam install compare
+```
+
+The development version can be installed by pinning the `master` branch:
+
+```
+opam pin add compare https://github.com/rizo/compare.git
 ```
 
 
