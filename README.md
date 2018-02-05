@@ -15,6 +15,7 @@ The following features are provided:
 - Equality and ordering functions for common data types.
 - New physical equality operator `is` and deprecated `==`.
 
+Consult the [online documentation](http://odis.io/compare/Compare) for more details.
 
 ## Examples
 
