@@ -40,8 +40,8 @@ let sum = List.fold_left (+.) 0.0
 (* Compare accounts by wealth and then by holder name. *)
 let by_wealth : account comparator =
   let open Comparator in
-  invert (lexical [by (sum << transactions) float;
-                   by holder string])
+  lexical [by (descending (sum << transactions)) float;
+           by holder string]
 
 let holders_by_wealth =
   [{ holder = "Alice"; transactions = [100.00; -25.00; -2.99; 30.00] };
