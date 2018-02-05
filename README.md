@@ -8,12 +8,12 @@ comparison operations.
 
 The following features are provided:
 
-- New [`ordering`](http://odis.io/compare/Compare/index.html#type-ordering) type to replace integer-based ordering.
-- Extended [`Ordered`](http://odis.io/compare/Compare/Ordered0/module-type-Extension) and [`Equal`](http://odis.io/compare/Compare/Equal/module-type-Extension) interfaces for custom types.
-- [Public](http://odis.io/compare/Compare/#public) comparison operations specialized to integers.
-- Convenience [Magic](http://odis.io/compare/Compare/#magic) module for polymorphic comparisons.
-- [Equality](http://odis.io/compare/Compare/Equality) and [ordering](http://odis.io/compare/Compare/Comparator) functions for common data types.
-- New physical equality operator [`is`](http://odis.io/compare/Compare/#val-is) and deprecated [`==`](http://odis.io/compare/Compare/#val-(==)).
+- New `ordering` type to replace integer-based ordering.
+- Extended `Ordered` and `Equal` interfaces for custom types.
+- Public comparison operations specialized to integers.
+- Convenience `Magic` module for polymorphic comparisons.
+- Equality and ordering functions for common data types.
+- New physical equality operator `is` and deprecated `==`.
 
 
 ## Examples
