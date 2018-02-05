@@ -2,6 +2,8 @@
 
 Functionality for comparison and ordering of OCaml values.
 
+- [API Reference](http://odis.io/compare/Compare)
+
 
 ## Examples
 
@@ -62,7 +64,7 @@ opam pin add compare https://github.com/rizo/compare.git
 ## Documentation
 
 The documentation and API reference is generated from the source interfaces. It
-can be consulted [online][http://odis.io/compare/Compare] or via `odig doc compare`.
+can be consulted [online](http://odis.io/compare/Compare) or via `odig doc compare`.
 
 
 ## License
