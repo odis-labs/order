@@ -2,7 +2,13 @@
 
 Functionality for comparison and ordering of OCaml values.
 
-> `opam install `**`compare`**
+## Installation
+
+This package can be installed with [OPAM](http://opam.ocaml.org):
+
+```
+opam install compare
+```
 
 
 ## Examples
