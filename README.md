@@ -69,6 +69,9 @@ module Person = struct
     name : string;
     age : int;
   }
+  
+  let say_hello t =
+    printf "Hello, %s!" t.name
 
   (* Base definition for ordering by age. *)
   module By_age = Ordered.Make(struct
@@ -85,7 +88,9 @@ module Person : sig
   type t = {
     name : string;
     age : int;
-  } 
+  }
+  
+  val say_hello : t -> unit
 
   module By_age : sig 
     val compare : t comparator        
