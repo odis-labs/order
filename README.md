@@ -107,12 +107,13 @@ module Person : sig
   end
 end
 
+(* The specialized operations can now be used in local scopes. *)
+
 let alice = Person.{ name = "Alice"; age = 23 }
 let bob   = Person.{ name = "Bob";   age = 28 }
 let craig = Person.{ name = "Craig"; age = 43 }
 
 let () =
-  (* The specialized operators can now be used in required scopes. *)
   assert Person.By_age.(bob > alice);
   assert Person.By_age.(max bob craig = craig);
   assert Person.By_age.(bob |> between ~min:alice ~max:craig)
