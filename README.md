@@ -59,6 +59,8 @@ let () =
   assert (equal holders_by_wealth ["David"; "Craig"; "Alice"; "Bob"])
 ```
 
+---
+
 Custom data types can implement the base `Equal` or `Ordered` interfaces and get specialised comparison functions for free.
 
 ```ocaml
