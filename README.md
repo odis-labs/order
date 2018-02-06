@@ -96,14 +96,12 @@ module Person : sig
     val compare : t comparator        
     val equal : t equality
     val not_equal : t equality
-
     val ( = ) : t equality
     val ( <> ) : t equality
     val ( < ) : t -> t -> bool        
     val ( > ) : t -> t -> bool
     val ( <= ) : t -> t -> bool
     val ( >= ) : t -> t -> bool
-
     val min : t -> t -> t
     val max : t -> t -> t
     val comparing : ('a -> t) -> 'a comparator
