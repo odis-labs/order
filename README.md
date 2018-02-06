@@ -119,9 +119,10 @@ let bob   = Person.{ name = "Bob";   age = 28 }
 let craig = Person.{ name = "Craig"; age = 43 }
 
 let () =
-  assert Person.By_age.(bob > alice);
-  assert Person.By_age.(max bob craig = craig);
-  assert Person.By_age.(bob |> between ~min:alice ~max:craig)
+  let open Person in
+  assert By_age.(bob > alice);
+  assert By_age.(max bob craig = craig);
+  assert By_age.(bob |> between ~min:alice ~max:craig)
 ```
 
 
