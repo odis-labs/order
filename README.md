@@ -82,7 +82,7 @@ module Person = struct
   end)
 end
 
-(* This will generate the following extended module *)
+(* This will generate the following extended module:
 
 module Person : sig
   type t = {
@@ -112,7 +112,7 @@ module Person : sig
   end
 end
 
-(* The specialized operations can now be used in local scopes. *)
+The generated specialized operations can now be used: *)
 
 let alice = Person.{ name = "Alice"; age = 23 }
 let bob   = Person.{ name = "Bob";   age = 28 }
