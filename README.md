@@ -59,6 +59,63 @@ let () =
   assert (equal holders_by_wealth ["David"; "Craig"; "Alice"; "Bob"])
 ```
 
+Custom data types can implement the base `Equal` or `Ordered` interfaces and get specialised comparison functions for free.
+
+```ocaml
+module Person = struct
+  type t = {
+    name : string;
+    age : int;
+  }
+
+  (* Base definition for ordering by age. *)
+  module By_age = Ordered.Make(struct
+    type nonrec t = t
+
+    let compare t1 t2 =
+      Comparator.int t1.age t2.age
+  end)
+end
+
+(* This will generate the following extended module *)
+
+module Person : sig
+  type t = {
+    name : string;
+    age : int;
+  } 
+
+  module By_age : sig 
+    val compare : t comparator        
+    val equal : t equality
+    val not_equal : t equality
+
+    val ( = ) : t equality
+    val ( <> ) : t equality
+    val ( < ) : t -> t -> bool        
+    val ( > ) : t -> t -> bool
+    val ( <= ) : t -> t -> bool
+    val ( >= ) : t -> t -> bool
+
+    val min : t -> t -> t
+    val max : t -> t -> t
+    val comparing : ('a -> t) -> 'a comparator
+    val between : min:t -> max:t -> t -> bool
+    val clamp : min:t -> max:t -> t -> t
+  end
+end
+
+let alice = Person.{ name = "Alice"; age = 23 }
+let bob   = Person.{ name = "Bob";   age = 28 }
+let craig = Person.{ name = "Craig"; age = 43 }
+
+let () =
+  (* The specialized operators can now be used in required scopes. *)
+  assert Person.By_age.(bob > alice);
+  assert Person.By_age.(max bob craig = craig);
+  assert Person.By_age.(bob |> between ~min:alice ~max:craig)
+```
+
 
 ## Installation
 
