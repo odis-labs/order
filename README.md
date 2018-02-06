@@ -19,6 +19,8 @@ Consult the [online documentation](http://odis.io/compare/Compare) for more deta
 
 ## Examples
 
+In this example we want to sort a list of accounts by the total sum of transactions and than by the holder name. A custom comparator function is defined used with `List.sort`.
+
 ```ocaml
 open Compare
 
