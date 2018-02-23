@@ -19,6 +19,8 @@ Consult the [online documentation](http://odis.io/compare/Compare) for more deta
 
 ## Examples
 
+In this example we want to sort a list of accounts by the total sum of transactions and than by the holder name. A custom comparator function is defined used with `List.sort`.
+
 ```ocaml
 open Compare
 
@@ -57,6 +59,70 @@ let () =
   assert (equal holders_by_wealth ["David"; "Craig"; "Alice"; "Bob"])
 ```
 
+---
+
+Custom data types can implement the base `Equal` or `Ordered` interfaces and get specialised comparison functions for free.
+
+```ocaml
+module Person = struct
+  type t = {
+    name : string;
+    age : int;
+  }
+  
+  let say_hello t =
+    printf "Hello, %s!" t.name
+
+  (* Base definition for ordering by age. *)
+  module By_age = Ordered.Make(struct
+    type nonrec t = t
+
+    let compare t1 t2 =
+      Comparator.int t1.age t2.age
+  end)
+end
+
+(* This will generate the following extended module:
+
+module Person : sig
+  type t = {
+    name : string;
+    age : int;
+  }
+  
+  val say_hello : t -> unit
+
+  module By_age : sig 
+    val compare : t comparator        
+    val equal : t equality
+    val not_equal : t equality
+    val ( = ) : t equality
+    val ( <> ) : t equality
+    val ( < ) : t -> t -> bool        
+    val ( > ) : t -> t -> bool
+    val ( <= ) : t -> t -> bool
+    val ( >= ) : t -> t -> bool
+    val min : t -> t -> t
+    val max : t -> t -> t
+    val comparing : ('a -> t) -> 'a comparator
+    val between : min:t -> max:t -> t -> bool
+    val clamp : min:t -> max:t -> t -> t
+  end
+end
+
+The generated specialized operations can now be used: *)
+
+let alice = Person.{ name = "Alice"; age = 23 }
+let bob   = Person.{ name = "Bob";   age = 28 }
+let craig = Person.{ name = "Craig"; age = 43 }
+
+let () =
+  let open Person in
+  assert By_age.(bob > alice);
+  assert By_age.(max bob craig = craig);
+  assert By_age.(bob |> between ~min:alice ~max:craig)
+```
+
 
 ## Installation
 
@@ -74,7 +140,7 @@ opam pin add compare https://github.com/rizo/compare.git
 
 ## Documentation
 
-The documentation and API reference is generated from the source interfaces and can be consulted both online and offline:
+The documentation is generated from the source interfaces and can be consulted both online and offline:
 
 - [Online API Reference](http://odis.io/compare/Compare)
 - Offline API Reference: `odig doc compare`
