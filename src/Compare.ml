@@ -10,6 +10,35 @@ module Ordering = struct
     | Equal
     | Greater
 
+  let inspect formatter t =
+    match t with
+    | Less    -> Format.fprintf formatter "Less"
+    | Equal   -> Format.fprintf formatter "Equal"
+    | Greater -> Format.fprintf formatter "Greater"
+
+  let display formatter t =
+    match t with
+    | Less    -> Format.fprintf formatter "<"
+    | Equal   -> Format.fprintf formatter "="
+    | Greater -> Format.fprintf formatter ">"
+
+  let equal t1 t2 =
+    match t1, t2 with
+    | Less, Less
+    | Equal, Equal
+    | Greater, Greater -> true
+    | _ -> false
+
+  let compare t1 t2 =
+    match t1, t2 with
+    | Less, Less -> Equal
+    | Equal, Equal -> Equal
+    | Greater, Greater -> Equal
+    | Less, _  -> Less
+    | Equal, Less -> Greater
+    | Equal, Greater -> Less
+    | Greater, _  -> Greater
+
   let to_int t =
     match t with
     | Less -> -1
@@ -21,20 +50,11 @@ module Ordering = struct
     if i > 0 then Greater else
     Equal
 
-  let is_less t =
+  let invert t =
     match t with
-    | Less -> true
-    | _ -> false
-
-  let is_equal t =
-    match t with
-    | Equal -> true
-    | _ -> false
-
-  let is_greater t =
-    match t with
-    | Greater -> true
-    | _ -> false
+    | Less -> Greater
+    | Equal -> Equal
+    | Greater -> Less
 end
 
 type 'a equality = 'a -> 'a -> bool
@@ -90,6 +110,9 @@ module Equality = struct
 
   let pair eq_a eq_b (a1, b1) (a2, b2) =
     eq_a a1 a2 && eq_b b1 b2
+
+  let by proj eq =
+    fun a1 a2 -> eq (proj a1) (proj a2)
 end
 
 type 'a comparator = 'a -> 'a -> ordering
@@ -111,6 +134,14 @@ module Comparator = struct
     let legacy_cmp : int -> int -> int = Pervasives.compare in
     Ordering.of_int (legacy_cmp t1 t2)
 
+  let int32 t1 t2 =
+    let legacy_cmp : int32 -> int32 -> int = Int32.compare in
+    Ordering.of_int (legacy_cmp t1 t2)
+
+  let int64 t1 t2 =
+    let legacy_cmp : int64 -> int64 -> int = Int64.compare in
+    Ordering.of_int (legacy_cmp t1 t2)
+
   let float t1 t2 =
     let legacy_cmp : float -> float -> int = Pervasives.compare in
     Ordering.of_int (legacy_cmp t1 t2)
@@ -119,16 +150,24 @@ module Comparator = struct
     let legacy_cmp : string -> string -> int = Pervasives.compare in
     Ordering.of_int (legacy_cmp t1 t2)
 
+  let string t1 t2 =
+    let legacy_cmp : string -> string -> int = Pervasives.compare in
+    Ordering.of_int (legacy_cmp t1 t2)
+
+  let bytes t1 t2 =
+    let legacy_cmp : bytes -> bytes -> int = Pervasives.compare in
+    Ordering.of_int (legacy_cmp t1 t2)
+
   let rec list cmp t1 t2 =
     match t1, t2 with
     | [], [] -> Equal
     | [],  _ -> Less
     | _ , [] -> Greater
     | a1 :: t1', a2 :: t2' ->
-      let ordering = cmp a1 a2 in
-      if ordering = Equal
-      then list cmp t1' t2'
-      else ordering
+      begin match cmp a1 a2 with
+      | Equal -> list cmp t1' t2'
+      | other -> other
+      end
 
   exception Array_cmp of ordering
 
@@ -163,30 +202,50 @@ module Comparator = struct
   let ref cmp t1 t2 = cmp !t1 !t2
 
   let pair cmp_a cmp_b (a1, b1) (a2, b2) =
-    let order = cmp_a a1 a2 in
-    if order = Equal then
-      cmp_b b1 b2
-    else order
+    match cmp_a a1 a2 with
+    | Equal -> cmp_b b1 b2
+    | other -> other
+
+  let invert cmp a1 a2 =
+    Ordering.invert (cmp a1 a2)
+
+  let ascending cmp = cmp
+  let descending = invert
+
+  let by proj cmp =
+    fun a1 a2 -> cmp (proj a1) (proj a2)
+
+  let rec lexical comparators r1 r2 =
+    match comparators with
+    | [] -> Equal
+    | cmp :: rest ->
+      begin match cmp r1 r2 with
+      | Equal -> lexical rest r1 r2
+      | other -> other
+      end
+
+  let to_integral cmp =
+    fun a1 a2 ->
+      Ordering.to_int (cmp a1 a2)
 end
 
 
 (* Equality *)
-
 module type Equal0 = sig
   type t
   val equal : t equality
-  val not_equal : t -> t -> bool
-  val ( = ) : t -> t -> bool
-  val ( <> ) : t -> t -> bool
 end
 
 module Equal0 = struct
-  module type Base = sig
+  module type Extension = sig
     type t
     val equal : t equality
+    val not_equal : t -> t -> bool
+    val ( = ) : t -> t -> bool
+    val ( <> ) : t -> t -> bool
   end
 
-  module Make (Base : Base) = struct
+  module Make (Base : Equal0) = struct
     let equal = Base.equal
     let not_equal t1 t2 = not (Base.equal t1 t2)
     let (=) = equal
@@ -198,16 +257,16 @@ end
 module type Equal1 = sig
   type 'a t
   val equal : 'a equality -> 'a t -> 'a t -> bool
-  val not_equal : 'a equality -> 'a t -> 'a t -> bool
 end
 
 module Equal1 = struct
-  module type Base = sig
+  module type Extension = sig
     type 'a t
     val equal : 'a equality -> 'a t -> 'a t -> bool
+    val not_equal : 'a equality -> 'a t -> 'a t -> bool
   end
 
-  module Make (Base : Base) = struct
+  module Make (Base : Equal1) = struct
     let equal = Base.equal
     let not_equal equal_a t1 t2 = not (Base.equal equal_a t1 t2)
   end
@@ -216,54 +275,50 @@ end
 module type Equal2 = sig
   type ('a, 'b) t
   val equal : 'a equality -> 'b equality -> ('a, 'b) t -> ('a, 'b) t -> bool
-  val not_equal : 'a equality -> 'b equality -> ('a, 'b) t -> ('a, 'b) t -> bool
 end
 
 module Equal2 = struct
-  module type Base = sig
+  module type Extension = sig
     type ('a, 'b) t
     val equal : 'a equality -> 'b equality -> ('a, 'b) t -> ('a, 'b) t -> bool
+    val not_equal : 'a equality -> 'b equality -> ('a, 'b) t -> ('a, 'b) t -> bool
   end
 
-  module Make (Base : Base) = struct
+  module Make (Base : Equal2) = struct
     let equal = Base.equal
     let not_equal equal_a equal_b t1 t2 = not (Base.equal equal_a equal_b t1 t2)
   end
 end
 
-module Equal = Equal0
 module type Equal = Equal0
+module Equal = Equal0
 
 
 (* Ordering *)
-
 module type Ordered0 = sig
   type t
   val compare : t -> t -> ordering
-
-  include Equal0 with type t := t
-
-  val less : t -> t -> bool
-  val greater : t -> t -> bool
-  val less_or_equal : t -> t -> bool
-  val greater_or_equal : t -> t -> bool
-  val ( < ) : t -> t -> bool
-  val ( > ) : t -> t -> bool
-  val ( <= ) : t -> t -> bool
-  val ( >= ) : t -> t -> bool
-  val min : t -> t -> t
-  val max : t -> t -> t
-  val between : min: t -> max: t -> t -> bool
-  val clamp : min: t -> max: t -> t -> t
 end
 
 module Ordered0 = struct
-  module type Base = sig
+  module type Extension = sig
     type t
     val compare : t -> t -> ordering
+
+    include Equal0.Extension with type t := t
+
+    val ( < ) : t -> t -> bool
+    val ( > ) : t -> t -> bool
+    val ( <= ) : t -> t -> bool
+    val ( >= ) : t -> t -> bool
+    val min : t -> t -> t
+    val max : t -> t -> t
+    val comparing  : ('a -> t) -> 'a comparator
+    val between : min: t -> max: t -> t -> bool
+    val clamp : min: t -> max: t -> t -> t
   end
 
-  module Make (Base : Base) = struct
+  module Make (Base : Ordered0) = struct
     let compare = Base.compare
 
     include Equal0.Make(struct
@@ -295,6 +350,9 @@ module Ordered0 = struct
     let min a b = if a < b then a else b
     let max a b = if a > b then a else b
 
+    let comparing f =
+      Comparator.by f compare
+
     let between ~min ~max x =
       if min <= max then
         raise (Invalid_argument "between: min <= max")
@@ -314,20 +372,20 @@ end
 
 
 (* Ord1 *)
-
 module type Ordered1 = sig
   type 'a t
   val compare : ('a -> 'a -> ordering) -> 'a t -> 'a t -> ordering
-  val min : ('a -> 'a -> ordering) -> 'a t -> 'a t -> 'a t
-  val max : ('a -> 'a -> ordering) -> 'a t -> 'a t -> 'a t
 end
+
 module Ordered1 = struct
-  module type Base = sig
+  module type Extension = sig
     type 'a t
     val compare : ('a -> 'a -> ordering) -> 'a t -> 'a t -> ordering
+    val min : ('a -> 'a -> ordering) -> 'a t -> 'a t -> 'a t
+    val max : ('a -> 'a -> ordering) -> 'a t -> 'a t -> 'a t
   end
 
-  module Make (Base : Base) = struct
+  module Make (Base : Ordered1) = struct
     let compare = Base.compare
 
     let min cmp_a t1 t2 =
@@ -342,6 +400,8 @@ module Ordered1 = struct
   end
 end
 
+
+(* Ord2 *)
 module type Ordered2 = sig
   type ('a, 'b) t
 
@@ -349,28 +409,27 @@ module type Ordered2 = sig
     ('a -> 'a -> ordering) ->
     ('b -> 'b -> ordering) ->
     ('a, 'b) t -> ('a, 'b) t -> ordering
-  val min :
-    ('a -> 'a -> ordering) ->
-    ('b -> 'b -> ordering) ->
-    ('a, 'b) t -> ('a, 'b) t -> ('a, 'b) t
-  val max :
-    ('a -> 'a -> ordering) ->
-    ('b -> 'b -> ordering) ->
-    ('a, 'b) t -> ('a, 'b) t -> ('a, 'b) t
 end
 
-(* Ord2 *)
 module Ordered2 = struct
-  module type Base = sig
+  module type Extension = sig
     type ('a, 'b) t
 
     val compare :
       ('a -> 'a -> ordering) ->
       ('b -> 'b -> ordering) ->
       ('a, 'b) t -> ('a, 'b) t -> ordering
+    val min :
+      ('a -> 'a -> ordering) ->
+      ('b -> 'b -> ordering) ->
+      ('a, 'b) t -> ('a, 'b) t -> ('a, 'b) t
+    val max :
+      ('a -> 'a -> ordering) ->
+      ('b -> 'b -> ordering) ->
+      ('a, 'b) t -> ('a, 'b) t -> ('a, 'b) t
   end
 
-  module Make (Base : Base) = struct
+  module Make (Base : Ordered2) = struct
     let compare = Base.compare
 
     let min cmp_a cmp_b a b =
@@ -386,11 +445,11 @@ module Ordered2 = struct
 end
 
 module Ordered = Ordered0
-(** Alias for interface builder for ordered monomorphic types. *)
-
 module type Ordered = Ordered0
 
 (* Public *)
+let compare : int -> int -> ordering = Comparator.int
+
 let ( = )  : int -> int -> bool = Pervasives.( = )
 let ( <> ) : int -> int -> bool = Pervasives.( <> )
 let ( < )  : int -> int -> bool = Pervasives.( < )
@@ -400,7 +459,7 @@ let ( >= ) : int -> int -> bool = Pervasives.( >= )
 let min    : int -> int -> int  = Pervasives.min
 let max    : int -> int -> int  = Pervasives.max
 let is = Pervasives.(==)
-let (==) = Pervasives.(==)
+let (==) = `Deprecated Pervasives.(==)
 
 
 module Magic = struct
@@ -426,5 +485,8 @@ module Magic = struct
 
   let min = Pervasives.min
   let max = Pervasives.max
+
+  let comparing f =
+    Comparator.by f compare
 end
 
