@@ -245,7 +245,7 @@ module Equal0 = struct
     val ( <> ) : t -> t -> bool
   end
 
-  module Make (Base : Equal0) = struct
+  module Extend (Base : Equal0) = struct
     let equal = Base.equal
     let not_equal t1 t2 = not (Base.equal t1 t2)
     let (=) = equal
@@ -266,7 +266,7 @@ module Equal1 = struct
     val not_equal : 'a equality -> 'a t -> 'a t -> bool
   end
 
-  module Make (Base : Equal1) = struct
+  module Extend (Base : Equal1) = struct
     let equal = Base.equal
     let not_equal equal_a t1 t2 = not (Base.equal equal_a t1 t2)
   end
@@ -284,7 +284,7 @@ module Equal2 = struct
     val not_equal : 'a equality -> 'b equality -> ('a, 'b) t -> ('a, 'b) t -> bool
   end
 
-  module Make (Base : Equal2) = struct
+  module Extend (Base : Equal2) = struct
     let equal = Base.equal
     let not_equal equal_a equal_b t1 t2 = not (Base.equal equal_a equal_b t1 t2)
   end
@@ -318,10 +318,10 @@ module Ordered0 = struct
     val clamp : min: t -> max: t -> t -> t
   end
 
-  module Make (Base : Ordered0) = struct
+  module Extend (Base : Ordered0) = struct
     let compare = Base.compare
 
-    include Equal0.Make(struct
+    include Equal0.Extend(struct
         type nonrec t = Base.t
         let equal a b =
           match Base.compare a b with
@@ -385,7 +385,7 @@ module Ordered1 = struct
     val max : ('a -> 'a -> ordering) -> 'a t -> 'a t -> 'a t
   end
 
-  module Make (Base : Ordered1) = struct
+  module Extend (Base : Ordered1) = struct
     let compare = Base.compare
 
     let min cmp_a t1 t2 =
@@ -429,7 +429,7 @@ module Ordered2 = struct
       ('a, 'b) t -> ('a, 'b) t -> ('a, 'b) t
   end
 
-  module Make (Base : Ordered2) = struct
+  module Extend (Base : Ordered2) = struct
     let compare = Base.compare
 
     let min cmp_a cmp_b a b =

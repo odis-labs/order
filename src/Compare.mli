@@ -167,7 +167,7 @@ module Book = struct
   }
 
   (* Equality by ISBN. *)
-  include Equal0.Make(struct
+  include Equal0.Extend(struct
     type nonrec t = t
 
     let equal t1 t2 =
@@ -283,7 +283,7 @@ module Equal0 : sig
   end
 
   (** Extends the base definition for equatable monomorphic types. *)
-  module Make (Base : Equal0) : Extension with type t := Base.t
+  module Extend (Base : Equal0) : Extension with type t := Base.t
 end
 
 
@@ -322,7 +322,7 @@ module Equal1 : sig
   end
 
   (** Interface builder for equatable polymorphic unary types. *)
-  module Make (Base : Equal1) : Extension with type 'a t := 'a Base.t
+  module Extend (Base : Equal1) : Extension with type 'a t := 'a Base.t
 end
 
 
@@ -364,7 +364,7 @@ module Equal2 : sig
   end
 
   (** Interface builder for equatable polymorphic binary types. *)
-  module Make (Base : Equal2) : Extension with type ('a, 'b) t := ('a, 'b) Base.t
+  module Extend (Base : Equal2) : Extension with type ('a, 'b) t := ('a, 'b) Base.t
 end
 
 (** {2 Default Aliases} *)
@@ -404,7 +404,7 @@ module Person = struct
   }
 
   (* Ordering by age. *)
-  module By_age = Ordered0.Make(struct
+  module By_age = Ordered0.Extend(struct
     type nonrec t = t
 
     let compare t1 t2 =
@@ -682,7 +682,7 @@ assert (f 15 = 10)
   end
 
   (** Interface builder for ordered types. *)
-  module Make (Base : Ordered0) : Extension with type t := Base.t
+  module Extend (Base : Ordered0) : Extension with type t := Base.t
 end
 
 (** {2 Polymorphic Unary Types}
@@ -709,7 +709,7 @@ module Ordered1 : sig
   end
 
   (** Interface builder for ordered types. *)
-  module Make (Base: Ordered1) : Extension with type 'a t := 'a Base.t
+  module Extend (Base: Ordered1) : Extension with type 'a t := 'a Base.t
 end
 
 
@@ -737,7 +737,7 @@ module Ordered2 : sig
   end
 
   (** Interface builder for ordered types. *)
-  module Make (Base : Ordered2) : Extension with type ('a, 'b) t := ('a, 'b) Base.t
+  module Extend (Base : Ordered2) : Extension with type ('a, 'b) t := ('a, 'b) Base.t
 end
 
 (** {2 Default Aliases} *)
