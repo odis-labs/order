@@ -109,6 +109,15 @@ module Equality = struct
   let pair eq_a eq_b (a1, b1) (a2, b2) =
     eq_a a1 a2 && eq_b b1 b2
 
+  let triple cmp_a cmp_b cmp_c (a1, b1, c1) (a2, b2, c2) =
+    match cmp_a a1 a2 with
+    | `EQ -> (
+        match cmp_b b1 b2 with
+        | `EQ -> cmp_c c1 c2
+        | other -> other
+      )
+    | other -> other
+
   let by proj eq =
     fun a1 a2 -> eq (proj a1) (proj a2)
 end

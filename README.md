@@ -22,7 +22,7 @@ Consult the [online documentation](http://odis.io/doc/order) for more details.
 In this example we want to sort a list of accounts by the total sum of transactions and than by the holder name. A custom comparator function is defined used with `List.sort`.
 
 ```ocaml
-open Order.Public
+open Order
 
 (* Function composition *)
 let (<<) f g = fun x -> f (g x)
@@ -64,7 +64,7 @@ let () =
 Custom data types can implement the base `Equal` or `Ordered` interfaces and get specialised comparison functions for free.
 
 ```ocaml
-open Order.Public
+open Order
 
 module Person = struct
   type t = {

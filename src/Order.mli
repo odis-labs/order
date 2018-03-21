@@ -25,7 +25,7 @@
     {- New structural {{: #type-ordering} [ordering]} type to replace integer-based ordering.}
     {- Extended {{: module-type-Ordered/index.html} [Ordered]} and {{:
     module-type-Equal/index.html} [Equal]} interfaces for custom types.}
-    {- {{: #public} Public} comparison operations specialized to integers.}
+    {- {{: #monomorphic_comparison} Public} comparison operations specialized to integers.}
     {- Convenience {{: #magic} [Magic]} module with polymorphic operations.}
     {- {{: Equality/index.html} Equality} and {{:
     Comparator/index.html} comparison} functions for common data
@@ -48,7 +48,7 @@
     {b Examples}
 
 {[
-open Order.Public
+open Order
 
 (* 2 < 2 *)
 let compare = Comparator.int in
@@ -230,6 +230,10 @@ module Equality : sig
 
   val pair : 'a equality -> 'b equality -> ('a * 'b) equality
   (** Equality testing function for pairs of type ['a * 'b]. *)
+
+  val tripple : 'a equality -> 'b equality -> 'c equality
+    -> ('a * 'b * 'c) equality
+  (** Equality testing function for triples of type ['a * 'b * 'c]. *)
 
   val by : ('a -> 'b) -> 'b equality -> 'a equality
   (** [by f equal] is a comparator that applies the projection function [f]
