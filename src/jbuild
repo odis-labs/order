@@ -1,8 +1,9 @@
 (jbuild_version 1)
 
 (library
- ((name Compare)
-  (public_name compare)
+ ((name Order)
+  (public_name order)
   (wrapped false)
-  (modules (Compare))))
+  (modules (Order))))
+
 

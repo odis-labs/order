@@ -22,7 +22,7 @@
     The following features are provided:
 
     {ul
-    {- New {{: #type-ordering} [ordering]} type to replace integer-based ordering.}
+    {- New structural {{: #type-ordering} [ordering]} type to replace integer-based ordering.}
     {- Extended {{: module-type-Ordered/index.html} [Ordered]} and {{:
     module-type-Equal/index.html} [Equal]} interfaces for custom types.}
     {- {{: #public} Public} comparison operations specialized to integers.}
@@ -31,11 +31,7 @@
     Comparator/index.html} comparison} functions for common data
     types.}
     {- New physical equality operator {{: #val-is} [is]} and deprecated {{: #val-(==)}
-    [==]}. }}
-
-
-
-*)
+    [==]}. }} *)
 
 
 (** {1:ordering_type Ordering Type} *)
@@ -52,7 +48,7 @@
     {b Examples}
 
 {[
-open Compare
+open Order.Public
 
 (* 2 < 2 *)
 let compare = Comparator.int in
@@ -67,9 +63,10 @@ let compare = Comparator.(pair int string) in
 assert (is Greater (compare (42, "abc") (42, "def")));
 ]} *)
 type ordering =
-  | Less    (** {e a < b}, {e a} is less than {e b}. *)
-  | Equal   (** {e a = b}, {e a} is equal to {e b}. *)
-  | Greater (** {e a > b}, {e a} is greater than {e b}. *)
+  [ `Less    (** {e a < b}, {e a} is less than {e b}. *)
+  | `Equal   (** {e a = b}, {e a} is equal to {e b}. *)
+  | `Greater (** {e a > b}, {e a} is greater than {e b}. *)
+  ]
 
 (** Module for the {!type:ordering} type. *)
 module Ordering : sig
@@ -77,10 +74,11 @@ module Ordering : sig
   (** {2:ordering_definition Definition} *)
 
   (** Defines the relative order of two values. *)
-  type t = ordering =
-    | Less    (** {e a < b}, {e a} is less than {e b}. *)
-    | Equal   (** {e a = b}, {e a} is equal to {e b}. *)
-    | Greater (** {e a > b}, {e a} is greater than {e b}. *)
+  type t =
+    [ `Less    (** {e a < b}, {e a} is less than {e b}. *)
+    | `Equal   (** {e a = b}, {e a} is equal to {e b}. *)
+    | `Greater (** {e a > b}, {e a} is greater than {e b}. *)
+    ]
 
 
   (** {2:ordering_basics Basics} *)
@@ -157,7 +155,7 @@ end
     {b Examples}
 
 {[
-open Compare
+open Order
 
 module Book = struct
   type t = {
@@ -395,7 +393,7 @@ module Equal = Equal0
 
     {b Example}
 {[
-open Compare
+open Order
 
 module Person = struct
   type t = {
@@ -773,7 +771,7 @@ val (==) : [`Deprecated of 'a -> 'a -> bool ]
 
 (** {1:monomorphic_comparison Monomorphic Comparison}
 
-    Public comparison operations included when the top-level [Compare] module
+    Public comparison operations included when the top-level [Order] module
     is open.
 
     By default the standard comparison functions are specialized to integers.
@@ -816,7 +814,7 @@ val max : int -> int -> int
     functions for structural comparison.
 
 {[
-open Compare.Magic
+open Order.Magic
 
 let () =
   assert ('A' < 'Z');
@@ -873,19 +871,19 @@ module Magic : sig
 
       [comparing f] is defined as [Comparator.by f Magic.compare].
 
-{[
-type person = { name : string; age : int }
+  {[
+  type person = { name : string; age : int }
 
-let by_age_descending : person comparator =
+  let by_age_descending : person comparator =
   Comparator.descending (comparing (fun p -> p.age))
 
-let () =
+  let () =
   [{ name = "Alice"; age = 24 };
    { name = "Bob";   age = 19 };
    { name = "Craig"; age = 45 }]
   |> List.sort (Comparator.to_integral by_age_descending)
   |> List.iter (fun p -> print_endline p.name)
-]} *)
+  ]} *)
 
   val ( <  ) : 'a -> 'a -> bool
   val ( >  ) : 'a -> 'a -> bool
@@ -911,10 +909,10 @@ let () =
       @raise Invalid_argument if function values are compared for equality.
 
       {b Warning:} Equality between cyclic data structures may not terminate.
-{[
-assert (min 2 5 = 2);
-assert (min [1; 2; 3] [2; 3; 4] = [1; 2; 3])
-]} *)
+  {[
+  assert (min 2 5 = 2);
+  assert (min [1; 2; 3] [2; 3; 4] = [1; 2; 3])
+  ]} *)
 
   val max : 'a -> 'a -> 'a
   (** [max a b] returns the greater of the two arguments.
@@ -924,11 +922,12 @@ assert (min [1; 2; 3] [2; 3; 4] = [1; 2; 3])
       @raise Invalid_argument if function values are compared for equality.
 
       {b Warning:} Equality between cyclic data structures may not terminate.
-{[
-assert (max 2 5 = 5);
-assert (max [1; 2; 3] [2; 3; 4] = [2; 3; 4])
-]} *)
+  {[
+  assert (max 2 5 = 5);
+  assert (max [1; 2; 3] [2; 3; 4] = [2; 3; 4])
+  ]} *)
 end
+
 
 
 (** {1:comparison_with_stdlib Comparison with Stdlib}
@@ -947,10 +946,10 @@ end
 
     {2 Monomorphic Comparison}
 
-    The reason why polymorphic operations in Order are not included is because
-    they are less efficient than the specialized versions and may cause runtime
-    errors if functions, or other non-comparable values (like definitions in C
-    bindings), are compared.
+    The reason why polymorphic operations are not included in this library is
+    because they are less efficient than the specialized versions and may cause
+    runtime errors if functions, or other non-comparable values (like
+    definitions in C bindings), are compared.
 
 {[
 let hello name =
@@ -959,6 +958,10 @@ in
   Pervasives.(hello = hello)
 (* Exception: Invalid_argument "compare: functional value". *)
 ]}
+
+    In this example it is clear that a function is being compared, but consider
+    the case where a nested generic data type is being compared which happens
+    to have a function value inside. The comparison will unexpectedly break.
 
     Using monomorphic comparison eliminates the possibility of accidentally
     comparing functions and encourages the creation of custom comparators for
@@ -971,25 +974,17 @@ in
     the low-level languages like C. As any convention not enforced by the
     type-system it can lead to errors, like accidentally using the ordering in
     numerical expressions or forgetting to handle a case. In ML languages
-    ordering can be defined as a union type, providing clear semantics, ...
-
-
-    Instead of using {!val:Magic.min}
-    prefer the monomorphic {!val:min} if you are working with integer values.
-    Custom data types can implement their own specialized {{: #equality}
-    equality} and {{: #ordering} ordering} interfaces.
+    ordering can be defined as a union type, providing clear semantics.
 
 
     {2 Equality Operators}
 
-Confusing for new-comers
+    Confusing for new-comers.
 
-Inconsistent with type definition semantics:
+    Inconsistent with type definition semantics:
 
 {[
 type type1 = type2 = A | B
 let var1 = var2 = 1
-]}
+]} *)
 
-
-*)

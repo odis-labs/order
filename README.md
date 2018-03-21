@@ -1,4 +1,4 @@
-# Compare (Unreleased)
+# Order (Unreleased)
 
 Functionality for comparison and ordering of OCaml values.
 
@@ -15,14 +15,14 @@ The following features are provided:
 - Equality and ordering functions for common data types.
 - New physical equality operator `is` and deprecated `==`.
 
-Consult the [online documentation](http://odis.io/compare/Compare) for more details.
+Consult the [online documentation](http://odis.io/doc/order) for more details.
 
 ## Examples
 
 In this example we want to sort a list of accounts by the total sum of transactions and than by the holder name. A custom comparator function is defined used with `List.sort`.
 
 ```ocaml
-open Compare
+open Order.Public
 
 (* Function composition *)
 let (<<) f g = fun x -> f (g x)
@@ -64,12 +64,14 @@ let () =
 Custom data types can implement the base `Equal` or `Ordered` interfaces and get specialised comparison functions for free.
 
 ```ocaml
+open Order.Public
+
 module Person = struct
   type t = {
     name : string;
     age : int;
   }
-  
+
   let say_hello t =
     printf "Hello, %s!" t.name
 
@@ -89,16 +91,16 @@ module Person : sig
     name : string;
     age : int;
   }
-  
+
   val say_hello : t -> unit
 
-  module By_age : sig 
-    val compare : t comparator        
+  module By_age : sig
+    val compare : t comparator
     val equal : t equality
     val not_equal : t equality
     val ( = ) : t equality
     val ( <> ) : t equality
-    val ( < ) : t -> t -> bool        
+    val ( < ) : t -> t -> bool
     val ( > ) : t -> t -> bool
     val ( <= ) : t -> t -> bool
     val ( >= ) : t -> t -> bool
@@ -129,21 +131,21 @@ let () =
 The current stable version of the package can be installed with [OPAM](http://opam.ocaml.org):
 
 ```
-opam install compare
+opam install order
 ```
 
 The development version can be installed by pinning the `master` branch:
 
 ```
-opam pin add compare https://github.com/rizo/compare.git
+opam pin add order https://github.com/rizo/order.git
 ```
 
 ## Documentation
 
 The documentation is generated from the source interfaces and can be consulted both online and offline:
 
-- [Online API Reference](http://odis.io/compare/Compare)
-- Offline API Reference: `odig doc compare`
+- [Online API Reference](http://odis.io/doc/order)
+- Offline API Reference: `odig doc order`
 
 
 ## License

@@ -1,60 +1,58 @@
 
 type ordering =
-  | Less
-  | Equal
-  | Greater
+  [ `Less
+  | `Equal
+  | `Greater
+  ]
 
 module Ordering = struct
-  type t = ordering =
-    | Less
-    | Equal
-    | Greater
+  type t = ordering
 
   let inspect formatter t =
     match t with
-    | Less    -> Format.fprintf formatter "Less"
-    | Equal   -> Format.fprintf formatter "Equal"
-    | Greater -> Format.fprintf formatter "Greater"
+    | `Less    -> Format.fprintf formatter "Less"
+    | `Equal   -> Format.fprintf formatter "Equal"
+    | `Greater -> Format.fprintf formatter "Greater"
 
   let display formatter t =
     match t with
-    | Less    -> Format.fprintf formatter "<"
-    | Equal   -> Format.fprintf formatter "="
-    | Greater -> Format.fprintf formatter ">"
+    | `Less    -> Format.fprintf formatter "<"
+    | `Equal   -> Format.fprintf formatter "="
+    | `Greater -> Format.fprintf formatter ">"
 
   let equal t1 t2 =
     match t1, t2 with
-    | Less, Less
-    | Equal, Equal
-    | Greater, Greater -> true
+    | `Less, `Less
+    | `Equal, `Equal
+    | `Greater, `Greater -> true
     | _ -> false
 
   let compare t1 t2 =
     match t1, t2 with
-    | Less, Less -> Equal
-    | Equal, Equal -> Equal
-    | Greater, Greater -> Equal
-    | Less, _  -> Less
-    | Equal, Less -> Greater
-    | Equal, Greater -> Less
-    | Greater, _  -> Greater
+    | `Less, `Less -> `Equal
+    | `Equal, `Equal -> `Equal
+    | `Greater, `Greater -> `Equal
+    | `Less, _  -> `Less
+    | `Equal, `Less -> `Greater
+    | `Equal, `Greater -> `Less
+    | `Greater, _  -> `Greater
 
   let to_int t =
     match t with
-    | Less -> -1
-    | Equal -> 0
-    | Greater -> 1
+    | `Less -> -1
+    | `Equal -> 0
+    | `Greater -> 1
 
   let of_int i =
-    if i < 0 then Less    else
-    if i > 0 then Greater else
-    Equal
+    if i < 0 then `Less    else
+    if i > 0 then `Greater else
+    `Equal
 
   let invert t =
     match t with
-    | Less -> Greater
-    | Equal -> Equal
-    | Greater -> Less
+    | `Less -> `Greater
+    | `Equal -> `Equal
+    | `Greater -> `Less
 end
 
 type 'a equality = 'a -> 'a -> bool
@@ -120,7 +118,7 @@ type 'a comparator = 'a -> 'a -> ordering
 module Comparator = struct
   type 'a t = 'a comparator
 
-  let unit () () = Equal
+  let unit () () = `Equal
 
   let bool t1 t2 =
     let legacy_cmp : bool -> bool -> int = Pervasives.compare in
@@ -160,12 +158,12 @@ module Comparator = struct
 
   let rec list cmp t1 t2 =
     match t1, t2 with
-    | [], [] -> Equal
-    | [],  _ -> Less
-    | _ , [] -> Greater
+    | [], [] -> `Equal
+    | [],  _ -> `Less
+    | _ , [] -> `Greater
     | a1 :: t1', a2 :: t2' ->
       begin match cmp a1 a2 with
-      | Equal -> list cmp t1' t2'
+      | `Equal -> list cmp t1' t2'
       | other -> other
       end
 
@@ -174,36 +172,36 @@ module Comparator = struct
   let array cmp t1 t2 =
     let t1_len = Array.length t1 in
     let t2_len = Array.length t2 in
-    if t1_len = 0 && t2_len = 0 then Equal
+    if t1_len = 0 && t2_len = 0 then `Equal
     else try
       Array.iter2
         (fun a1 a2 ->
            let ordering = cmp a1 a2 in
-           if ordering <> Equal then
+           if ordering <> `Equal then
              raise (Array_cmp ordering))
         t1 t2;
-      Equal
+      `Equal
     with Array_cmp ordering -> ordering
 
   let option cmp t1 t2 =
     match t1, t2 with
-    | None, None -> Equal
-    | None, Some _ -> Less
-    | Some _, None -> Greater
+    | None, None -> `Equal
+    | None, Some _ -> `Less
+    | Some _, None -> `Greater
     | Some a1, Some a2 -> cmp a1 a2
 
   let result cmp_ok cmp_err t1 t2 =
     match t1, t2 with
     | Error b1, Error b2 -> cmp_err b1 b2
-    | Error _, Ok _ -> Less
-    | Ok _, Error _  -> Greater
+    | Error _, Ok _ -> `Less
+    | Ok _, Error _  -> `Greater
     | Ok a1, Ok a2 -> cmp_ok a1 a2
 
   let ref cmp t1 t2 = cmp !t1 !t2
 
   let pair cmp_a cmp_b (a1, b1) (a2, b2) =
     match cmp_a a1 a2 with
-    | Equal -> cmp_b b1 b2
+    | `Equal -> cmp_b b1 b2
     | other -> other
 
   let invert cmp a1 a2 =
@@ -217,10 +215,10 @@ module Comparator = struct
 
   let rec lexical comparators r1 r2 =
     match comparators with
-    | [] -> Equal
+    | [] -> `Equal
     | cmp :: rest ->
       begin match cmp r1 r2 with
-      | Equal -> lexical rest r1 r2
+      | `Equal -> lexical rest r1 r2
       | other -> other
       end
 
@@ -325,19 +323,19 @@ module Ordered0 = struct
         type nonrec t = Base.t
         let equal a b =
           match Base.compare a b with
-          | Equal -> true
-          | Less | Greater -> false
+          | `Equal -> true
+          | `Less | `Greater -> false
       end)
 
     let less a b =
       match Base.compare a b with
-      | Less -> true
-      | Equal | Greater -> false
+      | `Less -> true
+      | `Equal | `Greater -> false
 
     let greater a b =
       match Base.compare a b with
-      | Greater -> true
-      | Less | Equal -> false
+      | `Greater -> true
+      | `Less | `Equal -> false
 
     let less_or_equal a b = not (greater a b)
     let greater_or_equal a b = not (less a b)
@@ -390,13 +388,13 @@ module Ordered1 = struct
 
     let min cmp_a t1 t2 =
       match Base.compare cmp_a t1 t2 with
-      | Less -> t1
-      | Equal | Greater -> t2
+      | `Less -> t1
+      | `Equal | `Greater -> t2
 
     let max cmp_a t1 t2 =
       match Base.compare cmp_a t1 t2 with
-      | Greater -> t1
-      | Equal | Less -> t2
+      | `Greater -> t1
+      | `Equal | `Less -> t2
   end
 end
 
@@ -434,20 +432,19 @@ module Ordered2 = struct
 
     let min cmp_a cmp_b a b =
       match Base.compare cmp_a cmp_b a b with
-      | Less -> a
-      | Equal | Greater -> b
+      | `Less -> a
+      | `Equal | `Greater -> b
 
     let max cmp_a cmp_b a b =
       match Base.compare cmp_a cmp_b a b with
-      | Greater -> a
-      | Equal | Less -> b
+      | `Greater -> a
+      | `Equal | `Less -> b
   end
 end
 
 module Ordered = Ordered0
 module type Ordered = Ordered0
 
-(* Public *)
 let compare : int -> int -> ordering = Comparator.int
 
 let ( = )  : int -> int -> bool = Pervasives.( = )
@@ -467,12 +464,12 @@ module Magic = struct
     let legacy_cmp : 'a -> 'a -> int = Pervasives.compare in
     let order = legacy_cmp a b in
     if order < 0 then
-      Less
+      `Less
     else
     if order > 0 then
-      Greater
+      `Greater
     else
-      Equal
+    `Equal
 
   let equal = Pervasives.( = )
 
@@ -489,4 +486,3 @@ module Magic = struct
   let comparing f =
     Comparator.by f compare
 end
-
