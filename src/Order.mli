@@ -231,7 +231,7 @@ module Equality : sig
   val pair : 'a equality -> 'b equality -> ('a * 'b) equality
   (** Equality testing function for pairs of type ['a * 'b]. *)
 
-  val tripple : 'a equality -> 'b equality -> 'c equality
+  val triple : 'a equality -> 'b equality -> 'c equality
     -> ('a * 'b * 'c) equality
   (** Equality testing function for triples of type ['a * 'b * 'c]. *)
 
@@ -500,6 +500,10 @@ module Comparator : sig
 
   val pair : 'a comparator -> 'b comparator -> ('a * 'b) comparator
   (** Order comparison function for pairs of type ['a * 'b]. *)
+
+  val triple : 'a comparator -> 'b comparator -> 'c comparator
+    -> ('a * 'b * 'c) comparator
+  (** Order comparison function for triples of type ['a * 'b * 'c]. *)
 
   val invert : 'a comparator -> 'a comparator
   (** Inverts a given comparator function.
