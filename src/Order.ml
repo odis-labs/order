@@ -375,7 +375,7 @@ module Ordered0 = struct
       if min_val <= max_val then
         raise (Invalid_argument "between: min <= max")
       else
-        min max_val (max min_val x)
+      min max_val (max min_val x)
   end
 
 end
@@ -470,31 +470,3 @@ let max    : int -> int -> int  = Pervasives.max
 let is = Pervasives.(==)
 let (==) = `Deprecated Pervasives.(==)
 
-
-module Magic = struct
-  let compare a b =
-    let legacy_cmp : 'a -> 'a -> int = Pervasives.compare in
-    let order = legacy_cmp a b in
-    if order < 0 then
-      `Less
-    else
-    if order > 0 then
-      `Greater
-    else
-    `Equal
-
-  let equal = Pervasives.( = )
-
-  let ( = )  = Pervasives.( =  )
-  let ( <> ) = Pervasives.( <> )
-  let ( <  ) = Pervasives.( <  )
-  let ( >  ) = Pervasives.( >  )
-  let ( <= ) = Pervasives.( <= )
-  let ( >= ) = Pervasives.( >= )
-
-  let min = Pervasives.min
-  let max = Pervasives.max
-
-  let comparing f =
-    Comparator.by f compare
-end

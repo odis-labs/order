@@ -1,0 +1,153 @@
+
+{1 Order}
+
+Functionality for comparison and ordering of OCaml values.
+
+
+{!modules:Order Order_magic}
+
+
+{2:overview Overview}
+
+Order is a library that defines types, interfaces and functions for equality
+and ordering comparisons. The following features are provided:
+
+{ul
+{- New structural {{: Order/index.html#ordering_type} [ordering]} type to replace integer-based ordering.}
+{- Extensible {{: module-type-Ordered/index.html} [Ordered]} and {{:
+module-type-Equal/index.html} [Equal]} interfaces for user-defined types.}
+{- {{: #monomorphic_comparison} Monomorphic} comparison operations specialized to integers.}
+{- Convenience {{: #poly} Polymorphic} module with comparison operations.}
+{- {{: _Equality} Equality} and {{: _Comparator} comparison} functions for
+common data types.}
+{- New physical equality operator {{: #val-is} [is]} and deprecated {{: #val-(==)}
+[==]}. }}
+
+
+{2:quickstart Quickstart}
+
+The library can be installed with {{: https://opam.ocaml.org} OPAM}:
+
+{[
+$ opam install order
+]}
+
+If you use {{: https://github.com/ocaml/dune} dune}, update the [libraries] section in your [jbuild] file:
+
+{[
+(libraries (... order))
+]}
+
+To use this library in {{: https://github.com/diml/utop} utop} you need to require it first:
+
+{[
+#require "order";;
+]}
+
+Finally, you can selectively import the items you need from the top-level
+[Order] module, or open the convenience {{: #} Prelude} which includes the
+commonly used items and the comparison operators specialized to integers:
+
+{[
+open Order.V1.Prelude
+
+type point = { x : int; y : int }
+
+let compare_point p1 p2 =
+  Comparator.(pair int int) (p1.x, p1.y) (p2.x, p2.y)
+]}
+
+
+{2:examples Examples}
+
+{3:comparing_records Comparing Records}
+
+In this example we use {{: #} [Comparator.lexical]} in combination with
+{{: #} [Comparator.by]} to define a custom ordering function for records.
+
+{[
+open Order.V1.Prelude
+
+type row = {
+  id: string;
+  count: int;
+  avg: float;
+}
+
+(* Field accessors. *)
+let id row = row.id
+let count row = row.count
+let avg row = row.avg
+
+(* Compare by avg, count, id *)
+let compare_row =
+  let open Comparator in
+  lexical [
+    by avg float;
+    by count int;
+    by id string;
+  ]
+
+let r1 = { id = "a1"; count = 21; avg = 13.8 }
+let r2 = { id = "a2"; count = 8;  avg = 18.4 }
+
+let () = assert (compare_row r1 r2 |> is Less)
+]}
+
+
+{3:implementing_interfaces Implementing Interfaces}
+
+User-defined types can implement interfaces to expose a standardized set of
+useful operations. In the following example the module [Person.By_age] defines
+an extended {{: #} [Ordered]} interface:
+
+{[
+open Order.V1.Prelude
+
+module Person : sig
+  type t
+
+  module By_age = Ordered.Extension with type t := t
+  (* This includes the following operations for free:
+     val compare : t Order.comparator
+     val equal : t Order.equality
+     val not_equal : t Order.equality
+     val ( = ) : t Order.equality
+     val ( <> ) : t Order.equality
+     val ( < ) : t -> t -> bool
+     val ( > ) : t -> t -> bool
+     val ( <= ) : t -> t -> bool
+     val ( >= ) : t -> t -> bool
+     val min : t -> t -> t
+     val max : t -> t -> t
+     val comparing : ('a -> t) -> 'a Order.comparator
+     val between : min:t -> max:t -> t -> bool
+     val clamp : min:t -> max:t -> t -> t *)
+end = struct
+  type t = {
+    name : string;
+    age : int;
+  }
+
+  (* Ordering by age. *)
+  module By_age = Ordered.Extend(struct
+    type nonrec t = t
+
+    let compare t1 t2 =
+      Comparator.int t1.age t2.age
+  end)
+end
+
+
+let alice = Person.{ name = "Alicea"; age = 23 }
+let bob   = Person.{ name = "Bob";    age = 28 }
+let craig = Person.{ name = "Craig";  age = 43 }
+
+let () =
+  assert Person.By_age.(bob > alice);
+  assert Person.By_age.(max bob craig == craig);
+  assert Person.By_age.(bob |> between ~min:alice ~max:craig)
+]}
+
+More examples can be found in the full {{: #} API documentation} or in the [examples]
+directory included in library's package.

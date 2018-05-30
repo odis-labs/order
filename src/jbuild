@@ -4,6 +4,9 @@
  ((name Order)
   (public_name order)
   (wrapped false)
-  (modules (Order))))
+  (modules (Order Order_magic))))
 
-
+;(documentation
+; ((package order)
+  ;(mld_files (Order)))
+;  ))

@@ -12,40 +12,20 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. *)
 
-(** Functionality for comparison and ordering of OCaml values.
-
-    {1:overview Overview}
-
-    This library defines types, interfaces and functions for equality and
-    ordering comparisons.
-
-    The following features are provided:
-
-    {ul
-    {- New structural {{: #type-ordering} [ordering]} type to replace integer-based ordering.}
-    {- Extended {{: module-type-Ordered/index.html} [Ordered]} and {{:
-    module-type-Equal/index.html} [Equal]} interfaces for custom types.}
-    {- {{: #monomorphic_comparison} Public} comparison operations specialized to integers.}
-    {- Convenience {{: #magic} [Magic]} module with polymorphic operations.}
-    {- {{: Equality/index.html} Equality} and {{:
-    Comparator/index.html} comparison} functions for common data
-    types.}
-    {- New physical equality operator {{: #val-is} [is]} and deprecated {{: #val-(==)}
-    [==]}. }} *)
+(** Functionality for comparison and ordering of OCaml values. *)
 
 
-(** {1:ordering_type Ordering Type} *)
+(** {2:ordering Ordering}
 
-(** Defines the relative ordering of two values.
 
-    Ordering values are produced by {i comparators} – functions that compare
-    two values. Implementations for common data types can be found in the {{:
-    Comparator/index.html} [Comparator]} module.
+    Ordering values are produced by {i comparators} - functions that compare
+    two values. Comparators for common data types can be found
+     in the {{: Comparator/index.html} [Comparator]} module.
 
     The complementary {!Ordering} module includes operations on [ordering]
     values.
 
-    {b Examples}
+    {4 Examples}
 
 {[
 open Order
@@ -62,16 +42,18 @@ assert (is Equal (compare [1; 2]));
 let compare = Comparator.(pair int string) in
 assert (is Greater (compare (42, "abc") (42, "def")));
 ]} *)
+
 type ordering =
   [ `Less    (** {e a < b}, {e a} is less than {e b}. *)
   | `Equal   (** {e a = b}, {e a} is equal to {e b}. *)
   | `Greater (** {e a > b}, {e a} is greater than {e b}. *)
   ]
+(** Defines the relative ordering of two values. *)
 
 (** Module for the {!type:ordering} type. *)
 module Ordering : sig
 
-  (** {2:ordering_definition Definition} *)
+  (** {3:ordering_definition Definition} *)
 
   (** Defines the relative order of two values. *)
   type t =
@@ -81,13 +63,13 @@ module Ordering : sig
     ]
 
 
-  (** {2:ordering_basics Basics} *)
+  (** {3:ordering_basics Basics} *)
 
   val invert : t -> t
   (** Inverts a given ordering. *)
 
 
-  (** {2:ordering_pretty_printing Pretty-printing} *)
+  (** {3:ordering_pretty_printing Pretty-printing} *)
 
   val inspect : Format.formatter -> t -> unit
   (** Pretty-printer for values of type [t] in debugging context. *)
@@ -98,7 +80,7 @@ module Ordering : sig
       mathematical symbols [<], [=] and [>] respectively. *)
 
 
-  (** {2:equality_and_comparison Equality and Comparison} *)
+  (** {3:equality_and_comparison Equality and Comparison} *)
 
   val equal : t -> t -> bool
   (** Checks if two ordering values are equal. This makes [t] an instance of
@@ -109,7 +91,7 @@ module Ordering : sig
       [Ordered0]. *)
 
 
-  (** {2:ordering_conversions Conversions} *)
+  (** {3:ordering_conversions Conversions} *)
 
   val to_int : t -> int
   (** Represents an ordering as an integers.
@@ -133,7 +115,7 @@ module Ordering : sig
 end
 
 
-(** {1:equality Equality}
+(** {2:equality Equality}
 
     Equality comparisons for monomorphic and polymorphic types.
 
@@ -152,7 +134,7 @@ end
     [Equal1] and [Equal2] would require extra arguments for each type
     parameter.
 
-    {b Examples}
+    {4 Examples}
 
 {[
 open Order
@@ -175,7 +157,7 @@ end
 ]} *)
 
 
-(** {2:equality_functions Equality functions} *)
+(** {3:equality_functions Equality functions} *)
 
 type 'a equality = 'a -> 'a -> bool
 (** The type of equality testing functions. *)
@@ -242,6 +224,9 @@ module Equality : sig
       This function can be used to, for example, extract fields or apply
       transformations on values before comparing them. The provided [equal]
       function will be applied to the values produced by [f].
+
+    {4 Examples}
+
 {[
 let l1 = [0; 1; 2; 3] in
 let l2 = [4; 5; 6; 7] in
@@ -251,7 +236,7 @@ assert (equal_by_length l1 l2))
 end
 
 
-(** {2:equal Monomorphic Types}
+(** {3:equal Monomorphic Types}
 
     Equality comparisons for monomorphic types, like integers and strings. *)
 
@@ -289,7 +274,7 @@ module Equal0 : sig
 end
 
 
-(** {2:equal1 Polymorphic Unary Types}
+(** {3:equal1 Polymorphic Unary Types}
 
     Equality comparisons for polymorphic unary types, like lists and option
     values. *)
@@ -319,8 +304,7 @@ module Equal1 : sig
     (** [not_equal equal_a t1 t2] tests if the values [t1] and [t2] are {i not}
         equal using the [equal_a] function to compare the values of type ['a].
 
-        [not_equal equal_a t1 t2] is a shorthand for [not (equal equal_a t1
-        t2)]. *)
+        [not_equal equal_a t1 t2] is a shorthand for [not (equal equal_a t1 t2)]. *)
   end
 
   (** Interface builder for equatable polymorphic unary types. *)
@@ -328,7 +312,7 @@ module Equal1 : sig
 end
 
 
-(** {2:equal2 Polymorphic Binary Types}
+(** {3:equal2 Polymorphic Binary Types}
 
     Equality comparisons for polymorphic binary types, like results or either
     types. *)
@@ -361,15 +345,15 @@ module Equal2 : sig
         not} equal using the [equal_a] and [equal_b] functions to compare the
         values of type ['a] and ['b] respectively.
 
-        [not_equal equal_a equal_b t1 t2] is a shorthand for [not (equal
-        equal_a equal_b t1 t2)]. *)
+        [not_equal equal_a equal_b t1 t2] is a shorthand for
+        [not (equal equal_a equal_b t1 t2)]. *)
   end
 
   (** Interface builder for equatable polymorphic binary types. *)
   module Extend (Base : Equal2) : Extension with type ('a, 'b) t := ('a, 'b) Base.t
 end
 
-(** {2 Default Aliases} *)
+(** {3 Default Aliases} *)
 
 module type Equal = Equal0
 (** Alias for extended interface for equatable monomorphic types. *)
@@ -378,7 +362,7 @@ module Equal = Equal0
 (** Alias for interface builder for equatable monomorphic types. *)
 
 
-(** {1:comparisons Comparisons}
+(** {2:comparisons Comparisons}
 
     This section defines types, interfaces and operations for values that form
     a total order relation.
@@ -386,8 +370,8 @@ module Equal = Equal0
     An order is a total order if it is (for all [a], [b] and [c]):
 
     {ul
-    {- {i total} and {i antisymmetric}: exactly one of [a < b], [a = b] or [a
-    > b] is true;}
+    {- {i total} and {i antisymmetric}: exactly one of [a < b], [a = b] or
+    [a > b] is true;}
     {- {i transitive}, [a < b] and [b < c] implies [a < c]. The same must hold
     for [=] and [>].}}
 
@@ -395,7 +379,7 @@ module Equal = Equal0
     interfaces (based on to the arity of the main type) to included a
     specialized comparison functions.
 
-    {b Example}
+    {4 Example}
 {[
 open Order
 
@@ -425,7 +409,7 @@ let () =
 ]} *)
 
 
-(** {2:comparison_functions Comparison functions} *)
+(** {3:comparison_functions Comparison functions} *)
 
 type 'a comparator = 'a -> 'a -> ordering
 (** The type of order comparison functions.
@@ -435,7 +419,9 @@ type 'a comparator = 'a -> 'a -> ordering
     functions for common monomorphic and polymorphic types and can be used for
     that.
 
-    For example, arrays of optional pairs with ints and strings can be
+    {4 Examples}
+
+    An arrays of optional pairs with ints and strings can be
     compared with:
 
 {[
@@ -508,10 +494,10 @@ module Comparator : sig
   val invert : 'a comparator -> 'a comparator
   (** Inverts a given comparator function.
 
-      {b See also:} {{: #val-descending} [descending]}, {{: #val-ascending}
+      {b See also:} {{: #val-descending} [descending]}, {{: #val-ascending}
       [ascending]}
 
-      {b Examples}
+      {4 Examples}
 
 {[
 let result =
@@ -536,6 +522,9 @@ assert (Equality.(list int) result [5; 4; 3; 2; 1])
       This function can be used to, for example, extract fields or apply
       transformations on values before comparing them. The provided
       [comparator] function will be applied to the values produced by [f].
+
+      {4 Examples}
+
 {[
 let l1 = [1; 2; 3; 4; 5] in
 let l2 = [1; 2; 3] in
@@ -553,8 +542,10 @@ assert (Ordering.is_greater (compare_by_length l1 l2))
       comparator. If the provided [comparators] list is empty the values are
       considered to be equal.
 
-      Combined with {!val:by} this function can be used to define comparator
+      Combined with "{!val:by}" this function can be used to define comparator
       functions for records, tuples or other complex data types.
+
+      {4 Examples}
 
 {[
 type player = {
@@ -594,7 +585,7 @@ let compare_players =
 end
 
 
-(** {2 Monomorphic Types}
+(** {3 Monomorphic Types}
 
   Ordering comparisons for monomorphic types. *)
 
@@ -644,7 +635,7 @@ module Ordered0 : sig
 
         [comparing f] is defined as [Comparator.by f compare].
 
-        {b Examples}
+        {4 Examples}
 
 {[
 type person = { name : string; age : int }
@@ -664,7 +655,7 @@ let () =
     (** [between ~min ~max x] tests whether the value [x] is between a minimum
         and a maximum (inclusive on both ends).
 
-        {b Examples}
+        {4 Examples}
 
 {[
 let f = between ~min:0 ~max:10 in
@@ -677,7 +668,7 @@ assert (not (f (-5)))
     val clamp : min: t -> max: t -> t -> t
     (** [clamp ~min ~max x] clamps the value [x] between a minimum and a maximum.
 
-        {b Examples}
+        {4 Examples}
 
 {[
 let f = clamp ~min:0 ~max:10
@@ -691,7 +682,7 @@ assert (f 15 = 10)
   module Extend (Base : Ordered0) : Extension with type t := Base.t
 end
 
-(** {2 Polymorphic Unary Types}
+(** {3 Polymorphic Unary Types}
 
     Ordering comparisons for polymorphic unary types. *)
 
@@ -719,7 +710,7 @@ module Ordered1 : sig
 end
 
 
-(** {2 Polymorphic Binary Types}
+(** {3 Polymorphic Binary Types}
 
     Ordering comparisons for polymorphic binary types. *)
 
@@ -746,7 +737,7 @@ module Ordered2 : sig
   module Extend (Base : Ordered2) : Extension with type ('a, 'b) t := ('a, 'b) Base.t
 end
 
-(** {2 Default Aliases} *)
+(** {3 Default Aliases} *)
 
 module type Ordered = Ordered0
 (** Alias for extended interface for ordered monomorphic types. *)
@@ -755,7 +746,7 @@ module Ordered = Ordered0
 (** Alias for interface builder for ordered monomorphic types. *)
 
 
-(** {1:physical_equality Physical Equality} *)
+(** {2:physical_equality Physical Equality} *)
 
 val is : 'a -> 'a -> bool
 (** [is a b] tests for physical equality of [a] and [b].
@@ -777,7 +768,7 @@ val (==) : [`Deprecated of 'a -> 'a -> bool ]
     compilation. *)
 
 
-(** {1:monomorphic_comparison Monomorphic Comparison}
+(** {3:monomorphic_comparison Monomorphic Comparison}
 
     Public comparison operations included when the top-level [Order] module
     is open.
@@ -815,130 +806,7 @@ val max : int -> int -> int
 (** Takes the maximum of two integers. *)
 
 
-(** {1:magic Magic ✨}
-
-    Polymorphic {{:
-    https://blog.janestreet.com/the-perils-of-polymorphic-compare/} "magic"}
-    functions for structural comparison.
-
-{[
-open Order.Magic
-
-let () =
-  assert ('A' < 'Z');
-  assert (max "abc" "xyz" = "xyz")
-]}
-    {b Warning:} The polymorphic functions in {!Magic} are provided for
-    convenience and must be used with care: they are less efficient than the
-    specialized versions and may cause runtime errors if functions, or other
-    non-comparable values, are compared. Instead of using {!val:Magic.min}
-    prefer the monomorphic {!val:min} if you are working with integer values.
-    Custom data types can implement their own specialized {{: #equality}
-    equality} and {{: #ordering} ordering} interfaces. *)
-
-module Magic : sig
-
-  (** {2:generic_equality Polymorphic Equality} *)
-
-  val ( = ) : 'a -> 'a -> bool
-  (** [a = b] tests for structural equality of [a] and [b]. Mutable
-      structures ({i e.g.} references and arrays) are equal if and only if
-      their current contents are structurally equal, even if the two mutable
-      objects are not the same physical object (as tested with {!val:is}).
-
-      @raise Invalid_argument if function values are compared for equality.
-
-      {b Warning:} Equality between cyclic data structures may not terminate.
-
-      {b See also:} {{: #val-equal} [equal]}, {{: #val-is} [is]} *)
-
-  val ( <> ) : 'a -> 'a -> bool
-  (** [a <> b] is [not (a = b)], {i i.e.}, the negation of {!(=)}. *)
-
-  val equal : 'a -> 'a -> bool
-  (** [equal a b] is equivalent to [a == b]. *)
-
-
-  (** {2:generic_ordering Polymorphic Ordering} *)
-
-  val compare : 'a comparator
-  (** [compare a b] returns [0] if [a] is equal to [b], [-1] if [a] is less than
-      [b], and [1] if [a] is greater than [b].
-      The ordering implemented by [compare] is compatible with the comparison
-      predicates [==], [<] and [>] defined above, with one difference on the
-      treatment of the float value {!nan}. Namely, the comparison predicates
-      treat [nan] as different from any other float value, including itself;
-      while [compare] treats [nan] as equal to itself and less than any other
-      float value. This treatment of [nan] ensures that [compare] defines a
-      total ordering relation.
-      @raise Invalid_argument if function values are compared for equality.
-      {b Warning:} Equality between cyclic data structures may not terminate. *)
-
-  val comparing  : ('a -> 'b) -> 'a comparator
-  (** Applies a projection function to obtain a comparable value of type ['b].
-
-      [comparing f] is defined as [Comparator.by f Magic.compare].
-
-  {[
-  type person = { name : string; age : int }
-
-  let by_age_descending : person comparator =
-  Comparator.descending (comparing (fun p -> p.age))
-
-  let () =
-  [{ name = "Alice"; age = 24 };
-   { name = "Bob";   age = 19 };
-   { name = "Craig"; age = 45 }]
-  |> List.sort (Comparator.to_integral by_age_descending)
-  |> List.iter (fun p -> print_endline p.name)
-  ]} *)
-
-  val ( <  ) : 'a -> 'a -> bool
-  val ( >  ) : 'a -> 'a -> bool
-  val ( <= ) : 'a -> 'a -> bool
-  val ( >= ) : 'a -> 'a -> bool
-  (** {b Structural ordering functions.}
-
-      These functions coincide with the usual orderings over integers,
-      characters, strings, byte sequences and floating-point numbers, and extend
-      them to a total ordering over all types. The ordering is compatible with
-      {!(=)}. As in the case of {!(=)}, mutable structures are compared by
-      contents.
-
-      @raise Invalid_argument if function values are compared for equality.
-
-      {b Warning:} Equality between cyclic data structures may not terminate. *)
-
-  val min : 'a -> 'a -> 'a
-  (** [min a b] returns the smaller of the two arguments.
-      The result is unspecified if one of the arguments contains
-      the float value [nan].
-
-      @raise Invalid_argument if function values are compared for equality.
-
-      {b Warning:} Equality between cyclic data structures may not terminate.
-  {[
-  assert (min 2 5 = 2);
-  assert (min [1; 2; 3] [2; 3; 4] = [1; 2; 3])
-  ]} *)
-
-  val max : 'a -> 'a -> 'a
-  (** [max a b] returns the greater of the two arguments.
-      The result is unspecified if one of the arguments contains
-      the float value [nan].
-
-      @raise Invalid_argument if function values are compared for equality.
-
-      {b Warning:} Equality between cyclic data structures may not terminate.
-  {[
-  assert (max 2 5 = 5);
-  assert (max [1; 2; 3] [2; 3; 4] = [2; 3; 4])
-  ]} *)
-end
-
-
-
-(** {1:comparison_with_stdlib Comparison with Stdlib}
+(** {2:comparison_with_stdlib Comparison with Stdlib}
 
     There are three main differences between Order and the OCaml standard library:
 
@@ -951,8 +819,11 @@ end
     {- Physical equality can be tested with {{: #val-is} [is]}, and the
     standard library's {{: #val-(==)} [(==)]} operator is deprecated. }}
 
+    The following sections explain in detail the listed differences and the
+    rationale behind them.
 
-    {2 Monomorphic Comparison}
+
+    {3 Monomorphic Comparison}
 
     The reason why polymorphic operations are not included in this library is
     because they are less efficient than the specialized versions and may cause
@@ -969,14 +840,15 @@ in
 
     In this example it is clear that a function is being compared, but consider
     the case where a nested generic data type is being compared which happens
-    to have a function value inside. The comparison will unexpectedly break.
+    to have a function value inside (like a comparator). The comparison will
+    unexpectedly break.
 
     Using monomorphic comparison eliminates the possibility of accidentally
     comparing functions and encourages the creation of custom comparators for
     user-defined types.
 
 
-    {2 Ordering Type}
+    {3 Ordering Type}
 
     The integer-based relative ordering is a historical artifact inherited from
     the low-level languages like C. As any convention not enforced by the
@@ -985,7 +857,7 @@ in
     ordering can be defined as a union type, providing clear semantics.
 
 
-    {2 Equality Operators}
+    {3 Equality Operators}
 
     Confusing for new-comers.
 
