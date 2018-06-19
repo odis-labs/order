@@ -4,9 +4,9 @@
  ((name Order)
   (public_name order)
   (wrapped false)
-  (modules (Order Order_magic))))
+  (modules (Order Order_magic))
+  (libraries (result))))
 
-;(documentation
-; ((package order)
-  ;(mld_files (Order)))
-;  ))
+(documentation
+ ((package order)
+ (mld_files (index))))

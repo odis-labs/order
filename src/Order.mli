@@ -15,7 +15,7 @@
 (** Functionality for comparison and ordering of OCaml values. *)
 
 
-(** {2:ordering Ordering}
+(** {1:ordering Ordering}
 
 
     Ordering values are produced by {i comparators} - functions that compare
@@ -204,7 +204,7 @@ module Equality : sig
   val option : 'a equality -> 'a option equality
   (** Equality testing function for values of type [option]. *)
 
-  val result : 'a equality -> 'b equality -> ('a, 'b) result equality
+  val result : 'a equality -> 'b equality -> ('a, 'b) Result.result equality
   (** Equality testing function for values of type [result]. *)
 
   val ref : 'a equality -> 'a ref equality
@@ -362,7 +362,7 @@ module Equal = Equal0
 (** Alias for interface builder for equatable monomorphic types. *)
 
 
-(** {2:comparisons Comparisons}
+(** {1:comparisons Comparisons}
 
     This section defines types, interfaces and operations for values that form
     a total order relation.
@@ -478,7 +478,7 @@ module Comparator : sig
   val option : 'a comparator -> 'a option comparator
   (** Order comparison function for values of type [option]. *)
 
-  val result : 'a comparator -> 'b comparator -> ('a, 'b) result comparator
+  val result : 'a comparator -> 'b comparator -> ('a, 'b) Result.result comparator
   (** Order comparison function for values of type [result]. *)
 
   val ref : 'a comparator -> 'a ref comparator
@@ -806,7 +806,7 @@ val max : int -> int -> int
 (** Takes the maximum of two integers. *)
 
 
-(** {2:comparison_with_stdlib Comparison with Stdlib}
+(** {1:comparison_with_stdlib Comparison with Stdlib}
 
     There are three main differences between Order and the OCaml standard library:
 

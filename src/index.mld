@@ -4,7 +4,9 @@
 Functionality for comparison and ordering of OCaml values.
 
 
-{!modules:Order Order_magic}
+{2 Modules}
+
+{!modules: Order Order_magic}
 
 
 {2:overview Overview}
@@ -49,7 +51,7 @@ Finally, you can selectively import the items you need from the top-level
 commonly used items and the comparison operators specialized to integers:
 
 {[
-open Order.V1.Prelude
+open Order
 
 type point = { x : int; y : int }
 
@@ -66,7 +68,7 @@ In this example we use {{: #} [Comparator.lexical]} in combination with
 {{: #} [Comparator.by]} to define a custom ordering function for records.
 
 {[
-open Order.V1.Prelude
+open Order
 
 type row = {
   id: string;
@@ -102,7 +104,7 @@ useful operations. In the following example the module [Person.By_age] defines
 an extended {{: #} [Ordered]} interface:
 
 {[
-open Order.V1.Prelude
+open Order
 
 module Person : sig
   type t
