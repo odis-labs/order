@@ -7,7 +7,7 @@ license: "ISC"
 dev-repo: "https://github.com/rizo/order.git"
 bug-reports: "https://github.com/rizo/order/issues"
 
-descr: "Comparison and ordering of OCaml values."
+synopsis: "Comparison and ordering of OCaml values"
 tags: ["org:rizo" "comparison"]
 
 available: [ ocaml-version >= "4.01.0"]
