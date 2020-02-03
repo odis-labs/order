@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>index (order.index)</title><link rel="stylesheet" href="../odoc.css"/><meta charset="utf-8"/><meta name="generator" content="odoc %%VERSION%%"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="../highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script></head><body><div class="content"><header><nav><a href="../index.html">Up</a> – order</nav><nav class="toc"><ul><li><a href="#order">Order</a><ul><li><a href="#modules">Modules</a></li><li><a href="#overview">Overview</a></li><li><a href="#quickstart">Quickstart</a></li><li><a href="#examples">Examples</a><ul><li><a href="#comparing_records">Comparing Records</a></li><li><a href="#implementing_interfaces">Implementing Interfaces</a></li></ul></li></ul></li></ul></nav></header><h2 id="order"><a href="#order" class="anchor"></a>Order</h2><p>Functionality for comparison and ordering of OCaml values.</p><h3 id="modules"><a href="#modules" class="anchor"></a>Modules</h3><ul class="modules"><li><a href="Order/index.html"><code>Order</code></a></li><li><a href="Order_magic/index.html"><code>Order_magic</code></a></li></ul><h3 id="overview"><a href="#overview" class="anchor"></a>Overview</h3><p>Order is a library that defines types, interfaces and functions for equality and ordering comparisons. The following features are provided:</p><ul><li>New structural <a href="Order/index.html#ordering_type"><code>ordering</code></a> type to replace integer-based ordering.</li><li>Extensible <a href="module-type-Ordered/index.html"><code>Ordered</code></a> and <a href="module-type-Equal/index.html"><code>Equal</code></a> interfaces for user-defined types.</li><li><a href="#monomorphic_comparison">Monomorphic</a> comparison operations specialized to integers.</li><li>Convenience <a href="#poly">Polymorphic</a> module with comparison operations.</li><li><a href="_Equality">Equality</a> and <a href="_Comparator">comparison</a> functions for common data types.</li><li>New physical equality operator <a href="#val-is"><code>is</code></a> and deprecated <a href="#val-(==)"><code>==</code></a>.</li></ul><h3 id="quickstart"><a href="#quickstart" class="anchor"></a>Quickstart</h3><p>The library can be installed with <a href="https://opam.ocaml.org">OPAM</a>:</p><pre><code class="ml">$ opam install order</code></pre><p>If you use <a href="https://github.com/ocaml/dune">dune</a>, update the <code>libraries</code> section in your <code>jbuild</code> file:</p><pre><code class="ml">(libraries (... order))</code></pre><p>To use this library in <a href="https://github.com/diml/utop">utop</a> you need to require it first:</p><pre><code class="ml">#require &quot;order&quot;;;</code></pre><p>Finally, you can selectively import the items you need from the top-level <code>Order</code> module, or open the convenience <a href="#">Prelude</a> which includes the commonly used items and the comparison operators specialized to integers:</p><pre><code class="ml">open Order
+
+type point = { x : int; y : int }
+
+let compare_point p1 p2 =
+  Comparator.(pair int int) (p1.x, p1.y) (p2.x, p2.y)</code></pre><h3 id="examples"><a href="#examples" class="anchor"></a>Examples</h3><h4 id="comparing_records"><a href="#comparing_records" class="anchor"></a>Comparing Records</h4><p>In this example we use <a href="#"><code>Comparator.lexical</code></a> in combination with <a href="#"><code>Comparator.by</code></a> to define a custom ordering function for records.</p><pre><code class="ml">open Order
+
+type row = {
+  id: string;
+  count: int;
+  avg: float;
+}
+
+(* Field accessors. *)
+let id row = row.id
+let count row = row.count
+let avg row = row.avg
+
+(* Compare by avg, count, id *)
+let compare_row =
+  let open Comparator in
+  lexical [
+    by avg float;
+    by count int;
+    by id string;
+  ]
+
+let r1 = { id = &quot;a1&quot;; count = 21; avg = 13.8 }
+let r2 = { id = &quot;a2&quot;; count = 8;  avg = 18.4 }
+
+let () = assert (compare_row r1 r2 |&gt; is Less)</code></pre><h4 id="implementing_interfaces"><a href="#implementing_interfaces" class="anchor"></a>Implementing Interfaces</h4><p>User-defined types can implement interfaces to expose a standardized set of useful operations. In the following example the module <code>Person.By_age</code> defines an extended <a href="#"><code>Ordered</code></a> interface:</p><pre><code class="ml">open Order
+
+module Person : sig
+  type t
+
+  module By_age = Ordered.Extension with type t := t
+  (* This includes the following operations for free:
+     val compare : t Order.comparator
+     val equal : t Order.equality
+     val not_equal : t Order.equality
+     val ( = ) : t Order.equality
+     val ( &lt;&gt; ) : t Order.equality
+     val ( &lt; ) : t -&gt; t -&gt; bool
+     val ( &gt; ) : t -&gt; t -&gt; bool
+     val ( &lt;= ) : t -&gt; t -&gt; bool
+     val ( &gt;= ) : t -&gt; t -&gt; bool
+     val min : t -&gt; t -&gt; t
+     val max : t -&gt; t -&gt; t
+     val comparing : ('a -&gt; t) -&gt; 'a Order.comparator
+     val between : min:t -&gt; max:t -&gt; t -&gt; bool
+     val clamp : min:t -&gt; max:t -&gt; t -&gt; t *)
+end = struct
+  type t = {
+    name : string;
+    age : int;
+  }
+
+  (* Ordering by age. *)
+  module By_age = Ordered.Extend(struct
+    type nonrec t = t
+
+    let compare t1 t2 =
+      Comparator.int t1.age t2.age
+  end)
+end
+
+
+let alice = Person.{ name = &quot;Alicea&quot;; age = 23 }
+let bob   = Person.{ name = &quot;Bob&quot;;    age = 28 }
+let craig = Person.{ name = &quot;Craig&quot;;  age = 43 }
+
+let () =
+  assert Person.By_age.(bob &gt; alice);
+  assert Person.By_age.(max bob craig == craig);
+  assert Person.By_age.(bob |&gt; between ~min:alice ~max:craig)</code></pre><p>More examples can be found in the full <a href="#">API documentation</a> or in the <code>examples</code> directory included in library's package.</p></div></body></html>
