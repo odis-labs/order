@@ -125,9 +125,10 @@ end
     which means that it must be: {i reflexive}, {i symmetric} and {i
     transitive}.
 
-    User-defined types can implement the {!modtype:Equal0}, {!modtype:Equal1} or
-    {!modtype:Equal2} interfaces (according to the arity of the main type) to
-    include specialized equality comparison functions.
+    User-defined types can implement the {!module-type:Equal0},
+    {!module-type:Equal1} or {!module-type:Equal2} interfaces (according to the
+    arity of the main type) to include specialized equality comparison
+    functions.
 
     {b Note:} The extended version of [Equal] for polymorphic types does not
     include infix functions since they are only useful with two arguments and
@@ -468,6 +469,9 @@ module Comparator : sig
 
   val string : string comparator
   (** Order comparison function for values of type [string]. *)
+
+  val bytes : bytes comparator
+  (** Order comparison function for values of type [bytes]. *)
 
   val list : 'a comparator -> 'a list comparator
   (** Order comparison function for values of type [list]. *)

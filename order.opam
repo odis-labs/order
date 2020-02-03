@@ -1,23 +1,24 @@
 opam-version: "1.2"
-maintainer: "Rizo Isrof <rizo@odis.io>"
-authors: ["Rizo Isrof <rizo@odis.io>"]
-homepage: "http://rizo.github.io/order"
-doc: "http://rizo.github.io/order/doc"
+maintainer: "Rizo I. <rizo@odis.io>"
+authors: ["Rizo I. <rizo@odis.io>"]
+homepage: "http://odis-labs.github.io/order"
+doc: "http://odis-labs.github.io/order"
 license: "ISC"
-dev-repo: "https://github.com/rizo/order.git"
-bug-reports: "https://github.com/rizo/order/issues"
+dev-repo: "https://github.com/odis-labs/order.git"
+bug-reports: "https://github.com/odis-labs/order/issues"
 
 synopsis: "Comparison and ordering of OCaml values"
-tags: ["org:rizo" "comparison"]
+tags: ["org:odis" "comparison"]
 
 available: [ ocaml-version >= "4.01.0"]
 
 depends: [
-  "jbuilder" {build}
+  "dune" {build & >= "1.0"}
+  "stdlib-shims"
   "result"
 ]
 
 build: [
-  [ "jbuilder" "build" "-p" name "-j" jobs "@install" ]
+  [ "dune" "build" "-p" name "-j" jobs ]
 ]
 

@@ -62,14 +62,14 @@ module Equality = struct
 
   (* Equality testing functions *)
   let unit () () = true
-  let bool : bool equality = Pervasives.(=)
-  let char : char equality = Pervasives.(=)
-  let int : int equality = Pervasives.(=)
+  let bool : bool equality = Stdlib.(=)
+  let char : char equality = Stdlib.(=)
+  let int : int equality = Stdlib.(=)
   let int32 : int32 equality = Int32.equal
   let int64 : int64 equality = Int64.equal
-  let float : float equality = Pervasives.(=)
-  let string : string equality = Pervasives.(=)
-  let bytes : bytes equality = Pervasives.(=)
+  let float : float equality = Stdlib.(=)
+  let string : string equality = Stdlib.(=)
+  let bytes : bytes equality = Stdlib.(=)
 
   let rec list eq t1 t2 =
     match t1, t2 with
@@ -124,15 +124,15 @@ module Comparator = struct
   let unit () () = `Equal
 
   let bool t1 t2 =
-    let legacy_cmp : bool -> bool -> int = Pervasives.compare in
+    let legacy_cmp : bool -> bool -> int = Stdlib.compare in
     Ordering.of_int (legacy_cmp t1 t2)
 
   let char t1 t2 =
-    let legacy_cmp : char -> char -> int = Pervasives.compare in
+    let legacy_cmp : char -> char -> int = Stdlib.compare in
     Ordering.of_int (legacy_cmp t1 t2)
 
   let int t1 t2 =
-    let legacy_cmp : int -> int -> int = Pervasives.compare in
+    let legacy_cmp : int -> int -> int = Stdlib.compare in
     Ordering.of_int (legacy_cmp t1 t2)
 
   let int32 t1 t2 =
@@ -144,19 +144,15 @@ module Comparator = struct
     Ordering.of_int (legacy_cmp t1 t2)
 
   let float t1 t2 =
-    let legacy_cmp : float -> float -> int = Pervasives.compare in
+    let legacy_cmp : float -> float -> int = Stdlib.compare in
     Ordering.of_int (legacy_cmp t1 t2)
 
   let string t1 t2 =
-    let legacy_cmp : string -> string -> int = Pervasives.compare in
-    Ordering.of_int (legacy_cmp t1 t2)
-
-  let string t1 t2 =
-    let legacy_cmp : string -> string -> int = Pervasives.compare in
+    let legacy_cmp : string -> string -> int = Stdlib.compare in
     Ordering.of_int (legacy_cmp t1 t2)
 
   let bytes t1 t2 =
-    let legacy_cmp : bytes -> bytes -> int = Pervasives.compare in
+    let legacy_cmp : bytes -> bytes -> int = Stdlib.compare in
     Ordering.of_int (legacy_cmp t1 t2)
 
   let rec list cmp t1 t2 =
@@ -459,14 +455,14 @@ module type Ordered = Ordered0
 
 let compare : int -> int -> ordering = Comparator.int
 
-let ( = )  : int -> int -> bool = Pervasives.( = )
-let ( <> ) : int -> int -> bool = Pervasives.( <> )
-let ( < )  : int -> int -> bool = Pervasives.( < )
-let ( > )  : int -> int -> bool = Pervasives.( > )
-let ( <= ) : int -> int -> bool = Pervasives.( <= )
-let ( >= ) : int -> int -> bool = Pervasives.( >= )
-let min    : int -> int -> int  = Pervasives.min
-let max    : int -> int -> int  = Pervasives.max
-let is = Pervasives.(==)
-let (==) = `Deprecated Pervasives.(==)
+let ( = )  : int -> int -> bool = Stdlib.( = )
+let ( <> ) : int -> int -> bool = Stdlib.( <> )
+let ( < )  : int -> int -> bool = Stdlib.( < )
+let ( > )  : int -> int -> bool = Stdlib.( > )
+let ( <= ) : int -> int -> bool = Stdlib.( <= )
+let ( >= ) : int -> int -> bool = Stdlib.( >= )
+let min    : int -> int -> int  = Stdlib.min
+let max    : int -> int -> int  = Stdlib.max
+let is = Stdlib.(==)
+let (==) = `Deprecated Stdlib.(==)
 

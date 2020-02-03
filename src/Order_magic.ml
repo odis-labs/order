@@ -1,7 +1,7 @@
 open Order
 
 let compare a b =
-  let legacy_cmp : 'a -> 'a -> int = Pervasives.compare in
+  let legacy_cmp : 'a -> 'a -> int = Stdlib.compare in
   let order = legacy_cmp a b in
   if order < 0 then
     `Less
@@ -11,17 +11,17 @@ let compare a b =
   else
   `Equal
 
-let equal = Pervasives.( = )
+let equal = Stdlib.( = )
 
-let ( = )  = Pervasives.( =  )
-let ( <> ) = Pervasives.( <> )
-let ( <  ) = Pervasives.( <  )
-let ( >  ) = Pervasives.( >  )
-let ( <= ) = Pervasives.( <= )
-let ( >= ) = Pervasives.( >= )
+let ( = )  = Stdlib.( =  )
+let ( <> ) = Stdlib.( <> )
+let ( <  ) = Stdlib.( <  )
+let ( >  ) = Stdlib.( >  )
+let ( <= ) = Stdlib.( <= )
+let ( >= ) = Stdlib.( >= )
 
-let min = Pervasives.min
-let max = Pervasives.max
+let min = Stdlib.min
+let max = Stdlib.max
 
 let comparing f =
   Comparator.by f compare
