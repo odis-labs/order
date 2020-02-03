@@ -1,6 +1,6 @@
-# Order (Unreleased)
+# Order
 
-Functionality for comparison and ordering of OCaml values.
+Functionality for comparison and ordering of ReasonML/OCaml values.
 
 This library defines interfaces for equality and ordering comparisons.
 Types can implement `Equal` or `Ordered` interfaces to include specialized
