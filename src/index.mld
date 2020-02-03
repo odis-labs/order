@@ -15,15 +15,14 @@ Order is a library that defines types, interfaces and functions for equality
 and ordering comparisons. The following features are provided:
 
 {ul
-{- New structural {{: Order/index.html#ordering_type} [ordering]} type to replace integer-based ordering.}
+{- New structural {!type:Order.ordering} type to replace integer-based ordering.}
 {- Extensible {{: module-type-Ordered/index.html} [Ordered]} and {{:
 module-type-Equal/index.html} [Equal]} interfaces for user-defined types.}
 {- {{: #monomorphic_comparison} Monomorphic} comparison operations specialized to integers.}
 {- Convenience {{: #poly} Polymorphic} module with comparison operations.}
 {- {{: _Equality} Equality} and {{: _Comparator} comparison} functions for
 common data types.}
-{- New physical equality operator {{: #val-is} [is]} and deprecated {{: #val-(==)}
-[==]}. }}
+{- New physical equality operator {!val:Order.is} and deprecated {!val:Order.(==)}. }}
 
 
 {2:quickstart Quickstart}

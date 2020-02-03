@@ -17,7 +17,6 @@
 
 (** {1:ordering Ordering}
 
-
     Ordering values are produced by {i comparators} - functions that compare
     two values. Comparators for common data types can be found
      in the {{: Comparator/index.html} [Comparator]} module.
@@ -115,7 +114,7 @@ module Ordering : sig
 end
 
 
-(** {2:equality Equality}
+(** {1:equality Equality}
 
     Equality comparisons for monomorphic and polymorphic types.
 
@@ -158,7 +157,7 @@ end
 ]} *)
 
 
-(** {3:equality_functions Equality functions} *)
+(** {2:equality_functions Equality functions} *)
 
 type 'a equality = 'a -> 'a -> bool
 (** The type of equality testing functions. *)
@@ -237,7 +236,7 @@ assert (equal_by_length l1 l2))
 end
 
 
-(** {3:equal Monomorphic Types}
+(** {2:equal Monomorphic Types}
 
     Equality comparisons for monomorphic types, like integers and strings. *)
 
@@ -275,7 +274,7 @@ module Equal0 : sig
 end
 
 
-(** {3:equal1 Polymorphic Unary Types}
+(** {2:equal1 Polymorphic Unary Types}
 
     Equality comparisons for polymorphic unary types, like lists and option
     values. *)
@@ -313,7 +312,7 @@ module Equal1 : sig
 end
 
 
-(** {3:equal2 Polymorphic Binary Types}
+(** {2:equal2 Polymorphic Binary Types}
 
     Equality comparisons for polymorphic binary types, like results or either
     types. *)
@@ -354,7 +353,7 @@ module Equal2 : sig
   module Extend (Base : Equal2) : Extension with type ('a, 'b) t := ('a, 'b) Base.t
 end
 
-(** {3 Default Aliases} *)
+(** {2 Default Aliases} *)
 
 module type Equal = Equal0
 (** Alias for extended interface for equatable monomorphic types. *)
@@ -410,7 +409,7 @@ let () =
 ]} *)
 
 
-(** {3:comparison_functions Comparison functions} *)
+(** {2:comparison_functions Comparison functions} *)
 
 type 'a comparator = 'a -> 'a -> ordering
 (** The type of order comparison functions.
@@ -589,7 +588,7 @@ let compare_players =
 end
 
 
-(** {3 Monomorphic Types}
+(** {2 Monomorphic Types}
 
   Ordering comparisons for monomorphic types. *)
 
@@ -686,7 +685,7 @@ assert (f 15 = 10)
   module Extend (Base : Ordered0) : Extension with type t := Base.t
 end
 
-(** {3 Polymorphic Unary Types}
+(** {2 Polymorphic Unary Types}
 
     Ordering comparisons for polymorphic unary types. *)
 
@@ -714,7 +713,7 @@ module Ordered1 : sig
 end
 
 
-(** {3 Polymorphic Binary Types}
+(** {2 Polymorphic Binary Types}
 
     Ordering comparisons for polymorphic binary types. *)
 
@@ -741,7 +740,7 @@ module Ordered2 : sig
   module Extend (Base : Ordered2) : Extension with type ('a, 'b) t := ('a, 'b) Base.t
 end
 
-(** {3 Default Aliases} *)
+(** {2 Default Aliases} *)
 
 module type Ordered = Ordered0
 (** Alias for extended interface for ordered monomorphic types. *)
@@ -750,7 +749,7 @@ module Ordered = Ordered0
 (** Alias for interface builder for ordered monomorphic types. *)
 
 
-(** {2:physical_equality Physical Equality} *)
+(** {1:physical_equality Physical Equality} *)
 
 val is : 'a -> 'a -> bool
 (** [is a b] tests for physical equality of [a] and [b].
@@ -772,7 +771,7 @@ val (==) : [`Deprecated of 'a -> 'a -> bool ]
     compilation. *)
 
 
-(** {3:monomorphic_comparison Monomorphic Comparison}
+(** {1:monomorphic_comparison Monomorphic Comparison}
 
     Public comparison operations included when the top-level [Order] module
     is open.
@@ -863,12 +862,9 @@ in
 
     {3 Equality Operators}
 
-    Confusing for new-comers.
-
-    Inconsistent with type definition semantics:
-
-{[
-type type1 = type2 = A | B
-let var1 = var2 = 1
-]} *)
-
+    OCaml uses [(=)] for structural equality. The physical equality operator
+    [(==)] in OCaml is often confusing for new-comers familiar with other
+    languages, where this operator is used for structural equality checks. The
+    small mistake can lead to unpleasant surprises. To avoid this mistake Order
+    deprecates the {!val:(==)} operator and introduces {!val:is} as an alias
+    for physical equality. *)
