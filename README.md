@@ -15,7 +15,7 @@ The following features are provided:
 - Equality and ordering functions for common data types.
 - New physical equality operator `is` and deprecated `==`.
 
-Consult the [online documentation](http://odis.io/doc/order) for more details.
+Consult the [online documentation](https://odis-labs.github.io/order) for more details.
 
 ## Examples
 
@@ -137,14 +137,14 @@ opam install order
 The development version can be installed by pinning the `master` branch:
 
 ```
-opam pin add order https://github.com/rizo/order.git
+opam pin add order https://github.com/odis-labs/order.git
 ```
 
 ## Documentation
 
 The documentation is generated from the source interfaces and can be consulted both online and offline:
 
-- [Online API Reference](http://odis.io/doc/order)
+- [Online API Reference](https://odis-labs.github.io/order)
 - Offline API Reference: `odig doc order`
 
 
