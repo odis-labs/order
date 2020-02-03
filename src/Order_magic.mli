@@ -5,20 +5,21 @@ open Order
     functions for structural comparison.
 
     {[
-    open Order.Magic
+    open Order_magic
 
     let () =
     assert ('A' < 'Z');
     assert (max "abc" "xyz" = "xyz")
     ]}
 
-    {b Warning:} The polymorphic functions in {!Magic} are provided for
+    {b Warning:} The polymorphic functions in this module are provided for
     convenience and must be used with care: they are less efficient than the
     specialized versions and may cause runtime errors if functions, or other
-    non-comparable values, are compared. Instead of using {!val:Magic.min}
-    prefer the monomorphic {!val:min} if you are working with integer values.
-    Custom data types can implement their own specialized {{: #equality}
-    equality} and {{: #ordering} ordering} interfaces. *)
+    non-comparable values, are compared. Instead of using
+    {!val:Order_magic.min} prefer the monomorphic {!val:Order.min} if you are
+    working with integer values.  Custom data types can implement their own
+    specialized {{!module-type:Order.Equal} equality} and
+    {{!module-type:Order.Ordered} ordering} interfaces. *)
 
 
 (** {2:generic_equality Polymorphic Equality} *)
@@ -60,7 +61,7 @@ val compare : 'a comparator
 val comparing  : ('a -> 'b) -> 'a comparator
 (** Applies a projection function to obtain a comparable value of type ['b].
 
-    [comparing f] is defined as [Comparator.by f Magic.compare].
+    [comparing f] is defined as [Comparator.by f Order_magic.compare].
 
     {[
     type person = { name : string; age : int }
