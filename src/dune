@@ -3,7 +3,7 @@
  (public_name order)
  (wrapped false)
  (modules Order Order_magic)
- (libraries result))
+ (libraries result stdlib-shims))
 
 (documentation
  (package order)
